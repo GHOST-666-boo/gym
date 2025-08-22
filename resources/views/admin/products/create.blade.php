@@ -1,0 +1,346 @@
+@extends('layouts.admin')
+
+@section('title', 'Add New Product')
+
+@section('header')
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Add New Product</h1>
+            <p class="text-gray-600 mt-1">Create a new gym machine product</p>
+        </div>
+        <a href="{{ route('admin.products.index') }}" 
+           class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Products
+        </a>
+    </div>
+@endsection
+
+@section('content')
+    <div class="p-6">
+        <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+            @csrf
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Main Product Information -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Product Name -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Product Name <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               name="name" 
+                               id="name" 
+                               value="{{ old('name') }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('name') border-red-500 @enderror"
+                               placeholder="Enter product name"
+                               required>
+                        @error('name')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Price -->
+                    <div>
+                        <label for="price" class="block text-sm font-medium text-gray-700 mb-2">
+                            Price <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">$</span>
+                            </div>
+                            <input type="number" 
+                                   name="price" 
+                                   id="price" 
+                                   step="0.01"
+                                   min="0"
+                                   value="{{ old('price') }}"
+                                   class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('price') border-red-500 @enderror"
+                                   placeholder="0.00"
+                                   required>
+                        </div>
+                        @error('price')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Category -->
+                    <div>
+                        <label for="category_id" class="block text-sm font-medium text-gray-700 mb-2">
+                            Category
+                        </label>
+                        <select name="category_id" 
+                                id="category_id" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('category_id') border-red-500 @enderror">
+                            <option value="">Select a category (optional)</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('category_id')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Inventory Management -->
+                    <div class="bg-blue-50 rounded-lg p-4 space-y-4">
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Inventory Management</h3>
+                        
+                        <!-- Track Inventory Toggle -->
+                        <div class="flex items-center">
+                            <input type="hidden" name="track_inventory" value="0">
+                            <input type="checkbox" 
+                                   name="track_inventory" 
+                                   id="track_inventory" 
+                                   value="1"
+                                   {{ old('track_inventory', true) ? 'checked' : '' }}
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="track_inventory" class="ml-2 block text-sm text-gray-700">
+                                Track inventory for this product
+                            </label>
+                        </div>
+
+                        <div id="inventory-fields" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Stock Quantity -->
+                            <div>
+                                <label for="stock_quantity" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Stock Quantity <span class="text-red-500">*</span>
+                                </label>
+                                <input type="number" 
+                                       name="stock_quantity" 
+                                       id="stock_quantity" 
+                                       min="0"
+                                       value="{{ old('stock_quantity', 0) }}"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('stock_quantity') border-red-500 @enderror"
+                                       placeholder="0"
+                                       required>
+                                @error('stock_quantity')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Low Stock Threshold -->
+                            <div>
+                                <label for="low_stock_threshold" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Low Stock Alert <span class="text-red-500">*</span>
+                                </label>
+                                <input type="number" 
+                                       name="low_stock_threshold" 
+                                       id="low_stock_threshold" 
+                                       min="0"
+                                       value="{{ old('low_stock_threshold', 10) }}"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('low_stock_threshold') border-red-500 @enderror"
+                                       placeholder="10"
+                                       required>
+                                @error('low_stock_threshold')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                                <p class="mt-1 text-xs text-gray-500">Alert when stock falls to or below this number</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Short Description -->
+                    <div>
+                        <label for="short_description" class="block text-sm font-medium text-gray-700 mb-2">
+                            Short Description <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="short_description" 
+                                  id="short_description" 
+                                  rows="3"
+                                  maxlength="500"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('short_description') border-red-500 @enderror"
+                                  placeholder="Brief description for product listings (max 500 characters)"
+                                  required>{{ old('short_description') }}</textarea>
+                        <div class="mt-1 flex justify-between">
+                            @error('short_description')
+                                <p class="text-sm text-red-600">{{ $message }}</p>
+                            @else
+                                <p class="text-sm text-gray-500">Brief description for product listings</p>
+                            @enderror
+                            <span id="short_desc_count" class="text-sm text-gray-400">0/500</span>
+                        </div>
+                    </div>
+
+                    <!-- Long Description -->
+                    <div>
+                        <label for="long_description" class="block text-sm font-medium text-gray-700 mb-2">
+                            Detailed Description <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="long_description" 
+                                  id="long_description" 
+                                  rows="8"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('long_description') border-red-500 @enderror"
+                                  placeholder="Detailed product description, features, benefits, usage instructions, etc."
+                                  required>{{ old('long_description') }}</textarea>
+                        @error('long_description')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @else
+                            <p class="mt-1 text-sm text-gray-500">Detailed description for the product page</p>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Image Upload Section (removed legacy single upload) -->
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                <a href="{{ route('admin.products.index') }}" 
+                   class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        id="submit-btn"
+                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span class="submit-text">Create Product</span>
+                    <span class="loading-text hidden">
+                        <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Creating Product...
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+@endsection
+
+@push('scripts')
+<script>
+    // Character counter for short description
+    const shortDescTextarea = document.getElementById('short_description');
+    const shortDescCounter = document.getElementById('short_desc_count');
+    
+    function updateShortDescCounter() {
+        const length = shortDescTextarea.value.length;
+        shortDescCounter.textContent = `${length}/500`;
+        
+        if (length > 450) {
+            shortDescCounter.classList.add('text-red-500');
+            shortDescCounter.classList.remove('text-gray-400');
+        } else {
+            shortDescCounter.classList.add('text-gray-400');
+            shortDescCounter.classList.remove('text-red-500');
+        }
+    }
+    
+    shortDescTextarea.addEventListener('input', updateShortDescCounter);
+    updateShortDescCounter(); // Initialize counter
+
+    // Image preview functionality
+    const imageInput = document.getElementById('image');
+    const imagePreview = document.getElementById('image-preview');
+    const previewImg = document.getElementById('preview-img');
+    const uploadPlaceholder = document.getElementById('upload-placeholder');
+
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                imagePreview.classList.remove('hidden');
+                uploadPlaceholder.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            imagePreview.classList.add('hidden');
+            uploadPlaceholder.classList.remove('hidden');
+        }
+    });
+
+    // Drag and drop functionality
+    const dropZone = document.querySelector('.border-dashed');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        dropZone.classList.add('border-blue-400', 'bg-blue-50');
+    }
+
+    function unhighlight(e) {
+        dropZone.classList.remove('border-blue-400', 'bg-blue-50');
+    }
+
+    dropZone.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            imageInput.files = files;
+            const event = new Event('change', { bubbles: true });
+            imageInput.dispatchEvent(event);
+        }
+    }
+
+    // Inventory tracking toggle
+    const trackInventoryCheckbox = document.getElementById('track_inventory');
+    const inventoryFields = document.getElementById('inventory-fields');
+    const stockQuantityInput = document.getElementById('stock_quantity');
+    const lowStockThresholdInput = document.getElementById('low_stock_threshold');
+
+    function toggleInventoryFields() {
+        if (trackInventoryCheckbox.checked) {
+            inventoryFields.style.opacity = '1';
+            stockQuantityInput.disabled = false;
+            lowStockThresholdInput.disabled = false;
+            stockQuantityInput.required = true;
+            lowStockThresholdInput.required = true;
+        } else {
+            inventoryFields.style.opacity = '0.5';
+            stockQuantityInput.disabled = true;
+            lowStockThresholdInput.disabled = true;
+            stockQuantityInput.required = false;
+            lowStockThresholdInput.required = false;
+        }
+    }
+
+    trackInventoryCheckbox.addEventListener('change', toggleInventoryFields);
+    toggleInventoryFields(); // Initialize on page load
+
+    // Form submission loading state
+    const form = document.querySelector('form');
+    const submitBtn = document.getElementById('submit-btn');
+    const submitText = submitBtn.querySelector('.submit-text');
+    const loadingText = submitBtn.querySelector('.loading-text');
+
+    form.addEventListener('submit', function(e) {
+        // Show loading state
+        submitBtn.disabled = true;
+        submitText.classList.add('hidden');
+        loadingText.classList.remove('hidden');
+        
+        // Disable form inputs to prevent changes during submission
+        const inputs = form.querySelectorAll('input, textarea, select, button');
+        inputs.forEach(input => {
+            if (input !== submitBtn) {
+                input.disabled = true;
+            }
+        });
+    });
+</script>
+@endpush

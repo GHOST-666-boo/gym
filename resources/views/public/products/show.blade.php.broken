@@ -1,0 +1,1042 @@
+@extends('layouts.app')
+
+@section('title', $product->name . ' - Gym Machines')
+@section('description', $product->short_description)
+@section('keywords', 'gym machine, fitness equipment, ' . $product->name . ', ' . ($product->category ? $product->category->name : ''))
+
+@section('og_title', $product->name . ' - Professional Gym Equipment')
+@section('og_description', $product->short_description)
+@section('og_image', $product->primary_image_url ?: asset('images/gym-machines-logo.jpg'))
+
+@push('styles')
+<style>
+    /* Image Gallery Styles */
+    .image-zoom {
+        transition: transform 0.3s ease;
+    }
+    
+    .image-zoom:hover {
+        transform: scale(1.05);
+    }
+    
+    /* Lightbox Styles */
+    #image-lightbox {
+        backdrop-filter: blur(4px);
+        animation: fadeIn 0.3s ease;
+    }
+    
+    #image-lightbox.hidden {
+        animation: fadeOut 0.3s ease;
+    }
+    
+    #lightbox-image {
+        animation: zoomIn 0.3s ease;
+        max-height: calc(100vh - 8rem);
+    }
+    
+    /* Lightbox Controls */
+    #lightbox-close,
+    #lightbox-prev,
+    #lightbox-next {
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    
+    #lightbox-close:hover,
+    #lightbox-prev:hover,
+    #lightbox-next:hover {
+        background: rgba(0, 0, 0, 0.7);
+        transform: scale(1.1);
+    }
+    
+    /* Thumbnail hover effects */
+    .thumbnail-image {
+        transition: all 0.2s ease;
+    }
+    
+    .thumbnail-image:hover {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+    
+    @keyframes zoomIn {
+        from { 
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to { 
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    /* Mobile responsive adjustments */
+    @media (max-width: 768px) {
+        #lightbox-prev,
+        #lightbox-next {
+            width: 40px;
+            height: 40px;
+        }
+        
+        #lightbox-close {
+            top: 1rem;
+            right: 1rem;
+        }
+        
+        #lightbox-image {
+            max-height: calc(100vh - 6rem);
+        }
+    }
+</style>
+@endpush
+
+@section('content')
+<!-- Breadcrumb -->
+@php
+    $breadcrumbItems = [
+        ['title' => 'Home', 'url' => route('home')],
+        ['title' => 'Products', 'url' => route('products.index')]
+    ];
+    
+    if($product->category) {
+        $breadcrumbItems[] = ['title' => $product->category->name, 'url' => route('products.category', $product->category)];
+    }
+    
+    $breadcrumbItems[] = ['title' => $product->name];
+@endphp
+
+<x-breadcrumb :items="$breadcrumbItems" />
+
+<!-- Product Details -->
+<section class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Product Image Gallery -->
+            <div class="space-y-4" data-gallery="product-images">
+                @php
+                    $allImages = $product->all_image_urls;
+                    $primaryImage = $product->primary_image_url;
+                @endphp
+                
+                <!-- Main Image -->
+                <div class="aspect-w-4 aspect-h-3 bg-gray-200 rounded-lg overflow-hidden group">
+                    @if($primaryImage)
+                        <img id="main-image"
+                             src="{{ $primaryImage }}" 
+                             alt="{{ $product->name }}" 
+                             data-zoom
+                             data-title="{{ $product->name }}"
+                             class="w-full h-96 object-cover cursor-zoom-in image-zoom group-hover:scale-105 transition-transform duration-300"
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNzUgMTIwSDIyNVYxODBIMTc1VjEyMFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIwIDEwVjMwTTEwIDIwSDMwIiBzdHJva2U9IiM2Qjc0ODgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo8L3N2Zz4K'">
+                        
+                        <!-- Zoom Indicator -->
+                        <div class="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded-md text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <svg class="h-4 w-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                            </svg>
+                            Click to zoom
+                        </div>
+                        
+                        <!-- Image Counter -->
+                        @if(count($allImages) > 1)
+                            <div class="absolute bottom-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded-md text-sm">
+                                <span id="current-image-index">1</span> / {{ count($allImages) }}
+                            </div>
+                        @endif
+                    @else
+                        <div class="w-full h-96 bg-gray-200 flex items-center justify-center">
+                            <div class="text-center">
+                                <svg class="h-24 w-24 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-gray-500 text-sm">No image available</p>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+                
+                <!-- Thumbnail Gallery -->
+                @if(count($allImages) > 0)
+                <div class="grid grid-cols-4 gap-2" id="thumbnail-gallery">
+                    @foreach($allImages as $index => $imageUrl)
+                        <div class="aspect-square bg-gray-200 rounded-md overflow-hidden border-2 {{ $index === 0 ? 'border-blue-500' : 'border-transparent hover:border-gray-400' }} transition-colors duration-200">
+                            <img src="{{ $imageUrl }}" 
+                                 alt="{{ $product->name }} - View {{ $index + 1 }}" 
+                                 data-zoom
+                                 data-title="{{ $product->name }} - View {{ $index + 1 }}"
+                                 data-index="{{ $index }}"
+                                 class="thumbnail-image w-full h-full object-cover cursor-pointer hover:opacity-75 transition-opacity duration-200">
+                        </div>
+                    @endforeach
+                    
+                    <!-- Fill remaining slots with placeholders if less than 4 images -->
+                    @for($i = count($allImages); $i < 4; $i++)
+                        <div class="aspect-square bg-gray-100 rounded-md flex items-center justify-center border-2 border-dashed border-gray-300">
+                            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                        </div>
+                    @endfor
+                </div>
+                
+                @if(count($allImages) > 1)
+                    <p class="text-sm text-gray-500 text-center">
+                        <svg class="h-4 w-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        Click image to view in full screen • Use arrow keys to navigate • {{ count($allImages) }} images available
+                    </p>
+                @elseif(count($allImages) === 1)
+                    <p class="text-sm text-gray-500 text-center">
+                        <svg class="h-4 w-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        Click image to view in full screen
+                    </p>
+                @endif
+                @endif
+
+            <!-- Product Information -->
+            <div class="space-y-6">
+                @if($product->category)
+                    <span class="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">
+                        {{ $product->category->name }}
+                    </span>
+                @endif
+
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                        {{ $product->name }}
+                    </h1>
+                    <p class="text-xl text-gray-600 mb-6">
+                        {{ $product->short_description }}
+                    </p>
+                </div>
+
+                <div class="border-t border-b border-gray-200 py-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-3xl font-bold text-blue-600">
+                            ${{ number_format($product->price, 2) }}
+                        </span>
+                        @if($product->track_inventory)
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-600">Availability:</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $product->stock_status_color }}">
+                                    {{ $product->stock_status }}
+                                </span>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div></div>
+                        <div class="flex space-x-3">
+                            <button onclick="addToComparison({{ $product->id }})" 
+                                    class="compare-btn bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors duration-200">
+                                Add to Compare
+                            </button>
+                            <a href="{{ route('contact') }}" 
+                               class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
+                                Get Quote
+                            </a>
+                            <a href="{{ route('contact') }}" 
+                               class="border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-colors duration-200">
+                                Contact Us
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Features -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Key Features</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex items-center">
+                            <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-gray-700">Commercial Grade</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-gray-700">Safety Certified</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-gray-700">Durable Construction</span>
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-gray-700">Expert Support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Description -->
+        <div class="mt-16">
+            <div class="border-t border-gray-200 pt-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Product Details</h2>
+                <div class="prose prose-lg max-w-none text-gray-700">
+                    {!! nl2br(e($product->long_description)) !!}
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="mt-16">
+            <div class="border-t border-gray-200 pt-12">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                    <!-- Reviews Summary -->
+                    <div class="lg:col-span-1">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Customer Reviews</h2>
+                        
+                        @if($product->reviews_count > 0)
+                            <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                                <div class="text-center">
+                                    <div class="text-4xl font-bold text-gray-900 mb-2">
+                                        {{ number_format($product->average_rating, 1) }}
+                                    </div>
+                                    <div class="flex justify-center mb-2">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            @if($i <= round($product->average_rating))
+                                                <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                </svg>
+                                            @else
+                                                <svg class="h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                </svg>
+                                            @endif
+                                        @endfor
+                                    </div>
+                                    <div class="text-sm text-gray-600">
+                                        Based on {{ $product->reviews_count }} {{ Str::plural('review', $product->reviews_count) }}
+                                    </div>
+                                </div>
+                                
+                                <!-- Rating Distribution -->
+                                <div class="mt-6 space-y-2">
+                                    @foreach(range(5, 1) as $rating)
+                                        @php
+                                            $count = $product->rating_distribution[$rating] ?? 0;
+                                            $percentage = $product->reviews_count > 0 ? ($count / $product->reviews_count) * 100 : 0;
+                                        @endphp
+                                        <div class="flex items-center text-sm">
+                                            <span class="w-3">{{ $rating }}</span>
+                                            <svg class="h-4 w-4 text-yellow-400 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                            <div class="flex-1 mx-2">
+                                                <div class="bg-gray-200 rounded-full h-2">
+                                                    <div class="bg-yellow-400 h-2 rounded-full" style="width: {{ $percentage }}%"></div>
+                                                </div>
+                                            </div>
+                                            <span class="w-8 text-right">{{ $count }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <div class="bg-gray-50 rounded-lg p-6 mb-6 text-center">
+                                <svg class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                </svg>
+                                <p class="text-gray-600">No reviews yet</p>
+                                <p class="text-sm text-gray-500 mt-1">Be the first to review this product!</p>
+                            </div>
+                        @endif
+
+                        <!-- Write Review Button -->
+                        <button onclick="toggleReviewForm()" 
+                                class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
+                            Write a Review
+                        </button>
+                    </div>
+
+                    <!-- Reviews List and Form -->
+                    <div class="lg:col-span-2">
+                        <!-- Review Form -->
+                        <div id="review-form" class="hidden bg-white border border-gray-200 rounded-lg p-6 mb-8">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Write Your Review</h3>
+                            
+                            <form action="{{ route('reviews.store', $product) }}" method="POST" class="space-y-4">
+                                @csrf
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="reviewer_name" class="block text-sm font-medium text-gray-700 mb-1">
+                                            Your Name *
+                                        </label>
+                                        <input type="text" 
+                                               id="reviewer_name" 
+                                               name="reviewer_name" 
+                                               value="{{ old('reviewer_name', auth()->user()->name ?? '') }}"
+                                               required 
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('reviewer_name') border-red-500 @enderror">
+                                        @error('reviewer_name')
+                                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="reviewer_email" class="block text-sm font-medium text-gray-700 mb-1">
+                                            Your Email *
+                                        </label>
+                                        <input type="email" 
+                                               id="reviewer_email" 
+                                               name="reviewer_email" 
+                                               value="{{ old('reviewer_email', auth()->user()->email ?? '') }}"
+                                               required 
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('reviewer_email') border-red-500 @enderror">
+                                        @error('reviewer_email')
+                                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Rating *
+                                    </label>
+                                    <div class="flex space-x-1">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <label class="cursor-pointer">
+                                                <input type="radio" name="rating" value="{{ $i }}" class="sr-only" required>
+                                                <svg class="h-8 w-8 text-gray-300 hover:text-yellow-400 transition-colors duration-200 rating-star" 
+                                                     fill="currentColor" viewBox="0 0 20 20" data-rating="{{ $i }}">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                </svg>
+                                            </label>
+                                        @endfor
+                                    </div>
+                                    @error('rating')
+                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Review Title *
+                                    </label>
+                                    <input type="text" 
+                                           id="title" 
+                                           name="title" 
+                                           value="{{ old('title') }}"
+                                           placeholder="Summarize your review in a few words"
+                                           required 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('title') border-red-500 @enderror">
+                                    @error('title')
+                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="comment" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Your Review *
+                                    </label>
+                                    <textarea id="comment" 
+                                              name="comment" 
+                                              rows="4" 
+                                              required 
+                                              placeholder="Share your experience with this product..."
+                                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('comment') border-red-500 @enderror">{{ old('comment') }}</textarea>
+                                    @error('comment')
+                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div class="flex justify-end space-x-3">
+                                    <button type="button" 
+                                            onclick="toggleReviewForm()" 
+                                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors duration-200">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" 
+                                            class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200">
+                                        Submit Review
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Reviews List -->
+                        <div id="reviews-list">
+                            @if($product->approvedReviews->count() > 0)
+                                <div class="space-y-6">
+                                    @foreach($product->approvedReviews->take(5) as $review)
+                                        <div class="bg-white border border-gray-200 rounded-lg p-6">
+                                            <div class="flex items-start justify-between mb-4">
+                                                <div>
+                                                    <div class="flex items-center mb-2">
+                                                        @for($i = 1; $i <= 5; $i++)
+                                                            @if($i <= $review->rating)
+                                                                <svg class="h-4 w-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                                </svg>
+                                                            @else
+                                                                <svg class="h-4 w-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                                </svg>
+                                                            @endif
+                                                        @endfor
+                                                        <span class="ml-2 text-sm text-gray-600">{{ $review->rating }}/5</span>
+                                                    </div>
+                                                    <h4 class="font-semibold text-gray-900">{{ $review->title }}</h4>
+                                                </div>
+                                                <div class="text-sm text-gray-500">
+                                                    {{ $review->created_at->format('M j, Y') }}
+                                                </div>
+                                            </div>
+                                            
+                                            <p class="text-gray-700 mb-4">{{ $review->comment }}</p>
+                                            
+                                            <div class="text-sm text-gray-600">
+                                                <span class="font-medium">{{ $review->reviewer_name }}</span>
+                                                @if($review->user)
+                                                    <span class="text-green-600 ml-2">✓ Verified Customer</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                @if($product->approvedReviews->count() > 5)
+                                    <div class="text-center mt-6">
+                                        <button onclick="loadMoreReviews()" 
+                                                class="text-blue-600 hover:text-blue-800 font-medium">
+                                            Load More Reviews ({{ $product->approvedReviews->count() - 5 }} remaining)
+                                        </button>
+                                    </div>
+                                @endif
+                            @else
+                                <div class="text-center py-8">
+                                    <svg class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                    </svg>
+                                    <p class="text-gray-600">No reviews yet</p>
+                                    <p class="text-sm text-gray-500 mt-1">Be the first to share your experience!</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Related Products -->
+@if($relatedProducts->count() > 0)
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+            Related Products
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            @foreach($relatedProducts as $relatedProduct)
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                <div class="aspect-w-16 aspect-h-12 bg-gray-200">
+                    @if($relatedProduct->image_path)
+                        <img src="{{ asset('storage/' . $relatedProduct->image_path) }}" 
+                             alt="{{ $relatedProduct->name }}" 
+                             class="w-full h-40 object-cover"
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMjUgODBIMTc1VjEyMEgxMjVWODBaIiBmaWxsPSIjOUNBM0FGIi8+Cjwvc3ZnPgo='">
+                    @else
+                        <div class="w-full h-40 bg-gray-200 flex items-center justify-center">
+                            <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                    @endif
+                </div>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                        <a href="{{ route('products.show', $relatedProduct) }}" class="hover:text-blue-600 transition-colors duration-200">
+                            {{ $relatedProduct->name }}
+                        </a>
+                    </h3>
+                    <p class="text-gray-600 text-sm mb-3 line-clamp-2">
+                        {{ $relatedProduct->short_description }}
+                    </p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-lg font-bold text-blue-600">
+                            ${{ number_format($relatedProduct->price, 2) }}
+                        </span>
+                        <a href="{{ route('products.show', $relatedProduct) }}" 
+                           class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                            View Details →
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
+
+
+@endsection
+
+@push('styles')
+<style>
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+@endpush
+
+@push('structured-data')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": "{{ $product->name }}",
+    "description": "{{ $product->short_description }}",
+    @if($product->image_path)
+    "image": "{{ asset('storage/' . $product->image_path) }}",
+    @endif
+    "brand": {
+        "@type": "Brand",
+        "name": "Gym Machines"
+    },
+    "offers": {
+        "@type": "Offer",
+        "price": "{{ $product->price }}",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock",
+        "url": "{{ route('products.show', $product) }}"
+    },
+    @if($product->category)
+    "category": "{{ $product->category->name }}",
+    @endif
+    "url": "{{ route('products.show', $product) }}"
+}
+</script>
+@endpush
+
+@push('scripts')
+<script>
+    // Image Gallery and Lightbox functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const allImages = @json($product->all_image_urls);
+        const mainImage = document.getElementById('main-image');
+        const thumbnails = document.querySelectorAll('.thumbnail-image');
+        const currentImageIndex = document.getElementById('current-image-index');
+        let currentIndex = 0;
+
+        // Initialize thumbnail click handlers
+        thumbnails.forEach((thumbnail, index) => {
+            thumbnail.addEventListener('click', function() {
+                switchToImage(index);
+            });
+        });
+
+        // Switch to specific image
+        function switchToImage(index) {
+            if (index >= 0 && index < allImages.length) {
+                currentIndex = index;
+                
+                // Update main image
+                if (mainImage) {
+                    mainImage.src = allImages[index];
+                    mainImage.alt = `{{ $product->name }} - View ${index + 1}`;
+                }
+                
+                // Update image counter
+                if (currentImageIndex) {
+                    currentImageIndex.textContent = index + 1;
+                }
+                
+                // Update thumbnail borders
+                thumbnails.forEach((thumb, thumbIndex) => {
+                    const container = thumb.parentElement;
+                    if (thumbIndex === index) {
+                        container.classList.remove('border-transparent', 'hover:border-gray-400');
+                        container.classList.add('border-blue-500');
+                    } else {
+                        container.classList.remove('border-blue-500');
+                        container.classList.add('border-transparent', 'hover:border-gray-400');
+                    }
+                });
+            }
+        }
+
+        // Lightbox functionality
+        let lightboxOpen = false;
+        let lightboxIndex = 0;
+
+        // Create lightbox HTML
+        const lightboxHTML = `
+            <div id="image-lightbox" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden flex items-center justify-center">
+                <div class="relative max-w-7xl max-h-full p-4">
+                    <!-- Close button -->
+                    <button id="lightbox-close" class="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                    
+                    <!-- Previous button -->
+                    <button id="lightbox-prev" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 z-10 ${allImages.length <= 1 ? 'hidden' : ''}">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </button>
+                    
+                    <!-- Next button -->
+                    <button id="lightbox-next" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 z-10 ${allImages.length <= 1 ? 'hidden' : ''}">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                    
+                    <!-- Image -->
+                    <img id="lightbox-image" class="max-w-full max-h-full object-contain" src="" alt="">
+                    
+                    <!-- Image counter -->
+                    <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white bg-black bg-opacity-50 px-3 py-1 rounded-md ${allImages.length <= 1 ? 'hidden' : ''}">
+                        <span id="lightbox-counter">1</span> / ${allImages.length}
+                    </div>
+                    
+                    <!-- Image title -->
+                    <div class="absolute bottom-4 right-4 text-white bg-black bg-opacity-50 px-3 py-1 rounded-md">
+                        <span id="lightbox-title">{{ $product->name }}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add lightbox to page
+        document.body.insertAdjacentHTML('beforeend', lightboxHTML);
+
+        // Get lightbox elements
+        const lightbox = document.getElementById('image-lightbox');
+        const lightboxImage = document.getElementById('lightbox-image');
+        const lightboxCounter = document.getElementById('lightbox-counter');
+        const lightboxTitle = document.getElementById('lightbox-title');
+        const lightboxClose = document.getElementById('lightbox-close');
+        const lightboxPrev = document.getElementById('lightbox-prev');
+        const lightboxNext = document.getElementById('lightbox-next');
+
+        // Open lightbox when clicking on zoomable images
+        document.addEventListener('click', function(e) {
+            if (e.target.hasAttribute('data-zoom')) {
+                e.preventDefault();
+                const clickedIndex = e.target.dataset.index ? parseInt(e.target.dataset.index) : currentIndex;
+                openLightbox(clickedIndex);
+            }
+        });
+
+        // Lightbox functions
+        function openLightbox(index) {
+            lightboxOpen = true;
+            lightboxIndex = index;
+            updateLightboxImage();
+            lightbox.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            lightboxOpen = false;
+            lightbox.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function updateLightboxImage() {
+            if (lightboxIndex >= 0 && lightboxIndex < allImages.length) {
+                lightboxImage.src = allImages[lightboxIndex];
+                lightboxImage.alt = `{{ $product->name }} - View ${lightboxIndex + 1}`;
+                
+                if (lightboxCounter) {
+                    lightboxCounter.textContent = lightboxIndex + 1;
+                }
+                
+                if (lightboxTitle) {
+                    lightboxTitle.textContent = `{{ $product->name }} - View ${lightboxIndex + 1}`;
+                }
+            }
+        }
+
+        function nextImage() {
+            if (lightboxIndex < allImages.length - 1) {
+                lightboxIndex++;
+                updateLightboxImage();
+            }
+        }
+
+        function prevImage() {
+            if (lightboxIndex > 0) {
+                lightboxIndex--;
+                updateLightboxImage();
+            }
+        }
+
+        // Lightbox event listeners
+        if (lightboxClose) {
+            lightboxClose.addEventListener('click', closeLightbox);
+        }
+
+        if (lightboxNext) {
+            lightboxNext.addEventListener('click', nextImage);
+        }
+
+        if (lightboxPrev) {
+            lightboxPrev.addEventListener('click', prevImage);
+        }
+
+        // Close lightbox when clicking outside image
+        lightbox.addEventListener('click', function(e) {
+            if (e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (lightboxOpen) {
+                switch(e.key) {
+                    case 'Escape':
+                        closeLightbox();
+                        break;
+                    case 'ArrowLeft':
+                        prevImage();
+                        break;
+                    case 'ArrowRight':
+                        nextImage();
+                        break;
+                }
+            }
+        });
+
+        // Preload images for better performance
+        allImages.forEach(imageUrl => {
+            const img = new Image();
+            img.src = imageUrl;
+        });
+    });
+
+    // Enhanced product page functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add smooth animations to product elements
+        const productElements = document.querySelectorAll('.animate-fade-in-up');
+        productElements.forEach((el, index) => {
+            el.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        // Add hover effects to feature items
+        const featureItems = document.querySelectorAll('.flex.items-center');
+        featureItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.classList.add('transform', 'scale-105', 'transition-transform', 'duration-200');
+            });
+            item.addEventListener('mouseleave', function() {
+                this.classList.remove('transform', 'scale-105');
+            });
+        });
+
+        // Add copy functionality for product URL
+        const productUrl = window.location.href;
+        const shareButton = document.createElement('button');
+        shareButton.className = 'text-gray-500 hover:text-blue-600 transition-colors duration-200 ml-2';
+        shareButton.innerHTML = `
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+            </svg>
+        `;
+        shareButton.title = 'Share this product';
+        shareButton.addEventListener('click', () => {
+            window.utils?.copyToClipboard(productUrl);
+        });
+
+        // Add share button to product title area
+        const productTitle = document.querySelector('h1');
+        if (productTitle) {
+            productTitle.parentNode.appendChild(shareButton);
+        }
+
+        // Initialize comparison functionality
+        updateComparisonButton();
+    });
+
+    // Comparison functionality
+    function addToComparison(productId) {
+        fetch('{{ route("products.compare.add") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                product_id: productId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateComparisonButton();
+                updateComparisonWidget(data.count);
+                showNotification(data.message, 'success');
+            } else {
+                showNotification(data.error, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Failed to add product to comparison', 'error');
+        });
+    }
+
+    // Review form functionality
+    function toggleReviewForm() {
+        const form = document.getElementById('review-form');
+        form.classList.toggle('hidden');
+        
+        if (!form.classList.contains('hidden')) {
+            form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    // Rating stars functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const stars = document.querySelectorAll('.rating-star');
+        const ratingInputs = document.querySelectorAll('input[name="rating"]');
+        
+        stars.forEach((star, index) => {
+            star.addEventListener('mouseenter', function() {
+                highlightStars(index + 1);
+            });
+            
+            star.addEventListener('click', function() {
+                const rating = parseInt(this.dataset.rating);
+                ratingInputs[rating - 1].checked = true;
+                highlightStars(rating, true);
+            });
+        });
+        
+        // Reset stars on mouse leave
+        const ratingContainer = document.querySelector('.flex.space-x-1');
+        if (ratingContainer) {
+            ratingContainer.addEventListener('mouseleave', function() {
+                const checkedRating = document.querySelector('input[name="rating"]:checked');
+                if (checkedRating) {
+                    highlightStars(parseInt(checkedRating.value), true);
+                } else {
+                    highlightStars(0);
+                }
+            });
+        }
+        
+        function highlightStars(rating, permanent = false) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.remove('text-gray-300');
+                    star.classList.add('text-yellow-400');
+                } else {
+                    star.classList.remove('text-yellow-400');
+                    star.classList.add('text-gray-300');
+                }
+            });
+        }
+        
+        // Show review form if there are validation errors
+        @if($errors->any())
+            toggleReviewForm();
+        @endif
+    });
+
+    function loadMoreReviews() {
+        // This would load more reviews via AJAX
+        // For now, we'll just show a message
+        showNotification('Loading more reviews...', 'info');
+    }
+
+    function updateComparisonButton() {
+        const productId = {{ $product->id }};
+        
+        // Get current comparison products
+        fetch('{{ route("products.compare.products") }}')
+        .then(response => response.json())
+        .then(data => {
+            const comparisonIds = data.products.map(p => p.id);
+            const btn = document.querySelector('.compare-btn');
+            
+            if (btn) {
+                if (comparisonIds.includes(productId)) {
+                    btn.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                    btn.classList.add('bg-green-600', 'text-white', 'hover:bg-green-700');
+                    btn.textContent = 'Added to Compare';
+                    btn.disabled = true;
+                } else {
+                    btn.classList.remove('bg-green-600', 'text-white', 'hover:bg-green-700');
+                    btn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                    btn.textContent = 'Add to Compare';
+                    btn.disabled = false;
+                }
+            }
+        });
+    }
+
+    function updateComparisonWidget(count) {
+        // Update comparison widget if it exists
+        const widget = document.getElementById('comparison-widget');
+        if (widget) {
+            const countElement = widget.querySelector('.comparison-count');
+            if (countElement) {
+                countElement.textContent = count;
+            }
+            
+            if (count > 0) {
+                widget.classList.remove('hidden');
+            } else {
+                widget.classList.add('hidden');
+            }
+        }
+    }
+
+    function showNotification(message, type) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
+            type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+        }`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+</script>
+@endpush
