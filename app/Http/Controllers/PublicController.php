@@ -36,28 +36,39 @@ class PublicController extends Controller
      */
     public function products(Request $request): View
     {
-        // Prepare filters array
-        $filters = [
-            'search' => $request->get('search'),
-            'category' => $request->get('category'),
-            'min_price' => $request->get('min_price'),
-            'max_price' => $request->get('max_price'),
-            'sort_by' => $request->get('sort_by', 'name'),
-            'sort_direction' => $request->get('sort_direction', 'asc'),
-        ];
+        // Build the query
+        $query = Product::with(['category:id,name,slug', 'images'])->forListing();
 
-        // Remove empty filters
-        $filters = array_filter($filters, function ($value) {
-            return !empty($value);
-        });
+        // Apply multiple category filter
+        if ($request->has('categories') && is_array($request->categories)) {
+            $categoryIds = array_filter($request->categories);
+            if (!empty($categoryIds)) {
+                $query->whereIn('category_id', $categoryIds);
+            }
+        }
 
-        // Use cached products with advanced filtering
-        $products = $this->cacheService->getProductsWithPagination(12, $filters);
+        // Apply search filter
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%")
+                  ->orWhere('short_description', 'like', "%{$searchTerm}%");
+            });
+        }
 
-        // Get cached aggregations for filters
-        $aggregations = $this->cacheService->getAggregations();
-        $categories = $aggregations['category_counts'];
-        $priceRange = $aggregations['price_range'];
+        // Apply sorting (default to name ascending)
+        $query->orderBy('name', 'asc');
+
+        $products = $query->paginate(12)->withQueryString();
+
+        // Get all categories with product counts
+        $categories = Category::withCount('products')
+            ->orderBy('name')
+            ->get();
+
+        // Get price range for filters
+        $priceRange = $this->getPriceRange();
 
         return view('public.products.index', compact('products', 'categories', 'priceRange'));
     }

@@ -3,12 +3,12 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ContactController;
-use App\Http\Controllers\ComparisonController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes with full-page caching
@@ -33,14 +33,6 @@ Route::get('/newsletter/preferences/{token}', [App\Http\Controllers\NewsletterCo
 Route::post('/products/{product:slug}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 Route::get('/products/{product:slug}/reviews', [ReviewController::class, 'index'])->name('reviews.index');
 
-// Product comparison routes
-Route::get('/compare', [ComparisonController::class, 'index'])->name('products.compare');
-Route::post('/compare/add', [ComparisonController::class, 'add'])->name('products.compare.add');
-Route::post('/compare/remove', [ComparisonController::class, 'remove'])->name('products.compare.remove');
-Route::post('/compare/clear', [ComparisonController::class, 'clear'])->name('products.compare.clear');
-Route::get('/compare/count', [ComparisonController::class, 'count'])->name('products.compare.count');
-Route::get('/compare/products', [ComparisonController::class, 'products'])->name('products.compare.products');
-
 // SEO routes with full-page caching
 Route::middleware('full.page.cache')->group(function () {
     Route::get('/sitemap.xml', [PublicController::class, 'sitemap'])->name('sitemap');
@@ -57,6 +49,15 @@ Route::get('/test-product-simple', function () {
     $product = App\Models\Product::first();
     $relatedProducts = collect();
     return view('public.products.show', compact('product', 'relatedProducts'));
+});
+
+
+
+// Protected image routes
+Route::middleware(['image.access.control'])->group(function () {
+    Route::get('/protected/image/{token}', [App\Http\Controllers\ProtectedImageController::class, 'show'])
+        ->name('protected.image')
+        ->where('token', '[A-Za-z0-9+/=]+');
 });
 
 
@@ -122,6 +123,34 @@ Route::middleware(['auth', 'admin', 'admin.errors'])->prefix('admin')->name('adm
     Route::post('cache/clear-full-page', [App\Http\Controllers\Admin\CacheController::class, 'clearFullPage'])->name('cache.clear-full-page');
     Route::post('cache/clear-images', [App\Http\Controllers\Admin\CacheController::class, 'clearImages'])->name('cache.clear-images');
     Route::get('cache/stats', [App\Http\Controllers\Admin\CacheController::class, 'stats'])->name('cache.stats');
+    
+    // Profile management routes
+    Route::get('profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('profile', [AdminProfileController::class, 'update'])->name('profile.update');
+    Route::delete('profile', [AdminProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Settings management routes
+    Route::get('settings', [App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings.index');
+    Route::patch('settings', [App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
+    Route::post('settings/upload-logo', [App\Http\Controllers\Admin\SettingsController::class, 'uploadLogo'])->name('settings.upload-logo');
+    Route::post('settings/upload-favicon', [App\Http\Controllers\Admin\SettingsController::class, 'uploadFavicon'])->name('settings.upload-favicon');
+    Route::post('settings/upload-watermark-logo', [App\Http\Controllers\Admin\SettingsController::class, 'uploadWatermarkLogo'])->name('settings.upload-watermark-logo');
+    Route::get('settings/validation-summary', [App\Http\Controllers\Admin\SettingsController::class, 'getValidationSummary'])->name('settings.validation-summary');
+    Route::get('settings/test-protection', [App\Http\Controllers\Admin\SettingsController::class, 'testProtectionFeatures'])->name('settings.test-protection');
+    
+    // Watermark notification routes
+    Route::prefix('watermark-notifications')->name('watermark-notifications.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\WatermarkNotificationController::class, 'index'])->name('index');
+        Route::post('{notificationId}/dismiss', [App\Http\Controllers\Admin\WatermarkNotificationController::class, 'dismiss'])->name('dismiss');
+        Route::post('clear-old', [App\Http\Controllers\Admin\WatermarkNotificationController::class, 'clearOld'])->name('clear-old');
+        Route::get('health-status', [App\Http\Controllers\Admin\WatermarkNotificationController::class, 'healthStatus'])->name('health-status');
+        Route::post('test-watermark', [App\Http\Controllers\Admin\WatermarkNotificationController::class, 'testWatermark'])->name('test-watermark');
+        Route::get('cache-stats', [App\Http\Controllers\Admin\WatermarkNotificationController::class, 'cacheStats'])->name('cache-stats');
+        Route::post('clear-cache', [App\Http\Controllers\Admin\WatermarkNotificationController::class, 'clearCache'])->name('clear-cache');
+        Route::get('error-report', [App\Http\Controllers\Admin\WatermarkNotificationController::class, 'errorReport'])->name('error-report');
+        Route::post('test-error-handling', [App\Http\Controllers\Admin\WatermarkNotificationController::class, 'testErrorHandling'])->name('test-error-handling');
+        Route::get('protection-report', [App\Http\Controllers\Admin\WatermarkNotificationController::class, 'protectionReport'])->name('protection-report');
+    });
 });
 
 require __DIR__.'/auth.php';

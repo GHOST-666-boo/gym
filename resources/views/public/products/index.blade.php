@@ -1,397 +1,430 @@
 @extends('layouts.app')
 
-@section('title', 'All Gym Machines - Professional Fitness Equipment')
-@section('description', 'Browse our complete collection of professional gym machines and fitness equipment. Find the perfect equipment for your commercial or home gym.')
+@section('title', 'All Products - Premium Collection')
+@section('description', 'Browse our complete collection of premium products. Find the perfect items for your needs.')
 
 @section('content')
-<!-- Page Header -->
-<section class="bg-gray-50 py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Our Gym Machines
-            </h1>
-            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                Explore our comprehensive collection of professional-grade gym equipment designed to meet all your fitness needs.
-            </p>
-        </div>
-    </div>
-</section>
+    <!-- Page Header -->
+    <section class="bg-white py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Mobile Layout -->
+            <div class="block md:hidden">
+                <div class="text-center mb-4">
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        @if(request('categories'))
+                            @php
+                                $selectedCategories = is_array(request('categories')) ? request('categories') : [request('categories')];
+                                $selectedCategoryNames = $categories->whereIn('id', $selectedCategories)->pluck('name');
+                            @endphp
+                            @if($selectedCategoryNames->count() > 1)
+                                {{ $selectedCategoryNames->take(2)->join(', ') }}{{ $selectedCategoryNames->count() > 2 ? ' & more' : '' }}
+                            @else
+                                {{ $selectedCategoryNames->first() ?? 'Our Products' }}
+                            @endif
+                        @else
+                            Our Products
+                        @endif
+                    </h1>
+                </div>
 
-<!-- Search and Filters -->
-<section class="py-8 bg-white border-b">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <form method="GET" action="{{ route('products.search') }}" class="space-y-4">
-            <!-- Search Bar -->
-            <div class="flex flex-col md:flex-row gap-4">
-                <div class="flex-1">
-                    <label for="search" class="sr-only">Search products</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                <div class="flex items-center justify-between">
+                    <p class="text-gray-600">
+                        {{ $products->total() }} items
+                    </p>
+
+                    <!-- Grid View Toggle for Mobile -->
+                    <div class="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+                        <button onclick="setGridView(1)" id="grid-1-btn"
+                            class="grid-toggle-btn p-2 rounded-md transition-colors duration-200 bg-white shadow-sm">
+                            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
-                        </div>
-                        <input type="text" 
-                               name="search" 
-                               id="search"
-                               value="{{ request('search') }}"
-                               placeholder="Search gym machines..." 
-                               class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                        </button>
+                        <button onclick="setGridView(2)" id="grid-2-mobile-btn"
+                            class="grid-toggle-btn p-2 rounded-md transition-colors duration-200">
+                            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
-                <button type="submit" 
-                        class="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center">
-                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                    Search
-                </button>
             </div>
 
-            <!-- Filters -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <!-- Category Filter -->
-                <div>
-                    <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <select name="category" id="category" class="block w-full border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">All Categories</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                                {{ $category->name }}
-                            </option>
+            <!-- Desktop Layout -->
+            <div class="hidden md:block">
+                <div class="flex items-center justify-between w-full">
+                    <div class="text-center flex-grow">
+                        <h1 class="text-3xl font-bold text-gray-900">
+                            @if(request('categories'))
+                                @php
+                                    $selectedCategories = is_array(request('categories')) ? request('categories') : [request('categories')];
+                                    $selectedCategoryNames = $categories->whereIn('id', $selectedCategories)->pluck('name');
+                                @endphp
+                                @if($selectedCategoryNames->count() > 1)
+                                    {{ $selectedCategoryNames->take(2)->join(', ') }}{{ $selectedCategoryNames->count() > 2 ? ' & more' : '' }}
+                                @else
+                                    {{ $selectedCategoryNames->first() ?? 'Our Products' }}
+                                @endif
+                            @else
+                                Our Products
+                            @endif
+                        </h1>
+                        <p class="text-gray-600 mt-2">
+                            {{ $products->total() }} items
+                        </p>
+                    </div>
+
+                    <!-- Grid View Toggle for Desktop -->
+                    <div class="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+                        <button onclick="setGridView(2)" id="grid-2-btn"
+                            class="grid-toggle-btn p-2 rounded-md transition-colors duration-200 bg-white shadow-sm">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                            </svg>
+                        </button>
+                        <button onclick="setGridView(4)" id="grid-4-btn"
+                            class="grid-toggle-btn p-2 rounded-md transition-colors duration-200">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 5a1 1 0 011-1h1a1 1 0 011 1v1a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 12a1 1 0 011-1h1a1 1 0 011 1v1a1 1 0 01-1 1H5a1 1 0 01-1-1v-1zM4 19a1 1 0 011-1h1a1 1 0 011 1v1a1 1 0 01-1 1H5a1 1 0 01-1-1v-1zM11 5a1 1 0 011-1h1a1 1 0 011 1v1a1 1 0 01-1 1h-1a1 1 0 01-1-1V5zM11 12a1 1 0 011-1h1a1 1 0 011 1v1a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1zM11 19a1 1 0 011-1h1a1 1 0 011 1v1a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1zM18 5a1 1 0 011-1h1a1 1 0 011 1v1a1 1 0 01-1 1h-1a1 1 0 01-1-1V5zM18 12a1 1 0 011-1h1a1 1 0 011 1v1a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1zM18 19a1 1 0 011-1h1a1 1 0 011 1v1a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category Pills -->
+    <section class="bg-white border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="py-6">
+                <div class="category-pills-wrapper relative">
+                    <div class="flex items-center gap-4 overflow-x-auto pb-2"
+                        style="scrollbar-width: none; -ms-overflow-style: none;">
+                        <style>
+                            .flex.items-center.gap-4.overflow-x-auto::-webkit-scrollbar {
+                                display: none;
+                            }
+                        </style>
+                        @php
+                            $selectedCategories = request('categories', []);
+                            if (!is_array($selectedCategories)) {
+                                $selectedCategories = [$selectedCategories];
+                            }
+                            $selectedCategories = array_filter($selectedCategories);
+                        @endphp
+
+                        <!-- All Products -->
+                        <a href="{{ route('products.index') }}"
+                            class="flex-shrink-0 flex flex-col items-center gap-2 group {{ empty($selectedCategories) ? 'selected-category' : '' }}">
+                            <div
+                                class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors {{ empty($selectedCategories) ? 'bg-pink-100 border-2 border-pink-300' : '' }}">
+                                @if(empty($selectedCategories))
+                                    <div class="w-8 h-8 bg-pink-400 rounded-full flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                @else
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 6h16M4 12h16M4 18h16" />
+                                    </svg>
+                                @endif
+                            </div>
+                            <span
+                                class="text-sm font-medium text-gray-900 {{ empty($selectedCategories) ? 'text-pink-600' : '' }}">
+                                All Products
+                            </span>
+                        </a>
+
+                        <!-- Category Pills -->
+                        @foreach($categories->take(5) as $category)
+                            @php
+                                $isSelected = in_array($category->id, $selectedCategories);
+                                $newCategories = $selectedCategories;
+
+                                if ($isSelected) {
+                                    // Remove category if already selected
+                                    $newCategories = array_diff($newCategories, [$category->id]);
+                                } else {
+                                    // Add category if not selected
+                                    $newCategories[] = $category->id;
+                                }
+
+                                $newCategories = array_values(array_filter($newCategories));
+                            @endphp
+
+                            <button type="button" onclick="toggleCategory({{ $category->id }})"
+                                class="flex-shrink-0 flex flex-col items-center gap-2 group category-pill {{ $isSelected ? 'selected-category' : '' }}"
+                                data-category-id="{{ $category->id }}">
+                                <div
+                                    class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors {{ $isSelected ? 'bg-pink-100 border-2 border-pink-300' : '' }}">
+                                    @if($isSelected)
+                                        <div class="w-8 h-8 bg-pink-400 rounded-full flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                    @else
+                                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                    @endif
+                                </div>
+                                <span class="text-sm font-medium text-gray-900 {{ $isSelected ? 'text-pink-600' : '' }}">
+                                    {{ $category->name }}
+                                </span>
+                            </button>
                         @endforeach
-                    </select>
+                    </div>
                 </div>
 
-                <!-- Price Range -->
-                <div>
-                    <label for="min_price" class="block text-sm font-medium text-gray-700 mb-1">Min Price</label>
-                    <input type="number" 
-                           name="min_price" 
-                           id="min_price"
-                           value="{{ request('min_price') }}"
-                           min="{{ $priceRange['min'] }}"
-                           max="{{ $priceRange['max'] }}"
-                           placeholder="${{ $priceRange['min'] }}"
-                           class="block w-full border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                </div>
-
-                <div>
-                    <label for="max_price" class="block text-sm font-medium text-gray-700 mb-1">Max Price</label>
-                    <input type="number" 
-                           name="max_price" 
-                           id="max_price"
-                           value="{{ request('max_price') }}"
-                           min="{{ $priceRange['min'] }}"
-                           max="{{ $priceRange['max'] }}"
-                           placeholder="${{ $priceRange['max'] }}"
-                           class="block w-full border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                </div>
-
-                <!-- Sort Options -->
-                <div>
-                    <label for="sort_by" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
-                    <select name="sort_by" id="sort_by" class="block w-full border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                        <option value="name" {{ request('sort_by') == 'name' ? 'selected' : '' }}>Name</option>
-                        <option value="price" {{ request('sort_by') == 'price' ? 'selected' : '' }}>Price</option>
-                        <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Newest</option>
-                    </select>
-                    <input type="hidden" name="sort_direction" value="{{ request('sort_direction', 'asc') }}">
-                </div>
+                <!-- Clear Selection Button (only show if categories are selected) -->
+                @if(!empty($selectedCategories))
+                    <div class="mt-4 text-center">
+                        <a href="{{ route('products.index') }}"
+                            class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Clear Selection ({{ count($selectedCategories) }} selected)
+                        </a>
+                    </div>
+                @endif
             </div>
+        </div>
+    </section>
 
-            <!-- Filter Actions -->
-            <div class="flex flex-col sm:flex-row gap-2 justify-between items-center">
-                <div class="flex gap-2">
-                    <button type="submit" 
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-200">
-                        Apply Filters
-                    </button>
-                    <a href="{{ route('products.index') }}" 
-                       class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors duration-200">
-                        Clear All
+    <!-- Products Grid -->
+    <section class="py-8">
+        <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+            @if($products->count() > 0)
+                <!-- Products Grid -->
+                <div id="products-grid"
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-2 mb-8 transition-all duration-300">
+                    @foreach($products as $product)
+                        <x-product-card :product="$product" />
+                    @endforeach
+                </div>
+
+                <!-- Pagination -->
+                <div class="flex justify-center">
+                    {{ $products->links() }}
+                </div>
+            @else
+                <!-- No Products Message -->
+                <div class="text-center py-16">
+                    <svg class="mx-auto h-24 w-24 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                    <h3 class="text-2xl font-semibold text-gray-900 mb-2">No Products Available</h3>
+                    <p class="text-gray-600 mb-6">
+                        We're currently updating our product catalog. Please check back soon.
+                    </p>
+                    <a href="{{ route('contact') }}"
+                        class="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200">
+                        Contact Us for Information
+                        <svg class="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3">
+                            </path>
+                        </svg>
                     </a>
                 </div>
-                
-                <!-- Sort Direction Toggle -->
-                <div class="flex items-center gap-2">
-                    <span class="text-sm text-gray-600">Sort:</span>
-                    <button type="button" 
-                            onclick="toggleSortDirection()"
-                            class="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700">
-                        <span id="sort-direction-text">{{ request('sort_direction') == 'desc' ? 'Descending' : 'Ascending' }}</span>
-                        <svg id="sort-direction-icon" class="h-4 w-4 {{ request('sort_direction') == 'desc' ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-</section>
-
-<!-- Products Grid -->
-<section class="py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        @if($products->count() > 0)
-            <!-- Products Count -->
-            <div class="mb-8">
-                <p class="text-gray-600">
-                    Showing {{ $products->firstItem() }} to {{ $products->lastItem() }} of {{ $products->total() }} products
-                </p>
-            </div>
-
-            <!-- Products Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-                @foreach($products as $product)
-                <div class="card card-hover group animate-fade-in-up">
-                    <!-- Product Image -->
-                    <div class="aspect-w-16 aspect-h-12 bg-gray-200 overflow-hidden">
-                        @php
-                            $imageUrl = null;
-                            if ($product->relationLoaded('images') && $product->images->count()) {
-                                $imageUrl = $product->images->first()->url;
-                            } elseif ($product->image_path) {
-                                $imageUrl = asset('storage/' . $product->image_path);
-                            }
-                        @endphp
-                        @if($imageUrl)
-                            <img src="{{ $imageUrl }}" 
-                                 alt="{{ $product->name }}" 
-                                 class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMjUgODBIMTc1VjEyMEgxMjVWODBaIiBmaWxsPSIjOUNBM0FGIi8+Cjwvc3ZnPgo='">
-                        @else
-                            <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
-                                <svg class="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Product Info -->
-                    <div class="p-4">
-                        @if($product->category)
-                            <a href="{{ route('products.category', $product->category) }}" class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mb-2 hover:bg-blue-200 transition-colors duration-200">
-                                {{ $product->category->name }}
-                            </a>
-                        @endif
-                        
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                            <a href="{{ route('products.show', $product) }}" class="hover:text-blue-600 transition-colors duration-200">
-                                {{ $product->name }}
-                            </a>
-                        </h3>
-                        
-                        <p class="text-gray-600 text-sm mb-3 line-clamp-2">
-                            {{ $product->short_description }}
-                        </p>
-                        
-                        <div class="flex items-center justify-between">
-                            <span class="text-xl font-bold text-blue-600">
-                                ${{ number_format($product->price, 2) }}
-                            </span>
-                            <div class="flex gap-2">
-                                <button onclick="addToComparison({{ $product->id }})" 
-                                        class="compare-btn bg-gray-200 text-gray-700 px-2 py-2 rounded-md text-sm font-medium hover:bg-gray-300 transition-colors duration-200"
-                                        title="Add to comparison">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                    </svg>
-                                </button>
-                                <a href="{{ route('products.show', $product) }}" 
-                                   class="bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors duration-200">
-                                    View Details
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-
-            <!-- Pagination -->
-            <div class="flex justify-center">
-                {{ $products->links() }}
-            </div>
-        @else
-            <!-- No Products Message -->
-            <div class="text-center py-16">
-                <svg class="mx-auto h-24 w-24 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                </svg>
-                <h3 class="text-2xl font-semibold text-gray-900 mb-2">No Products Available</h3>
-                <p class="text-gray-600 mb-6">
-                    We're currently updating our product catalog. Please check back soon for our latest gym machines.
-                </p>
-                <a href="{{ route('contact') }}" 
-                   class="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200">
-                    Contact Us for Information
-                    <svg class="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                    </svg>
-                </a>
-            </div>
-        @endif
-    </div>
-</section>
-
-<!-- Call to Action -->
-<section class="bg-gray-50 py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl font-bold text-gray-900 mb-4">
-            Need Help Choosing the Right Equipment?
-        </h2>
-        <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Our fitness equipment experts are here to help you find the perfect gym machines for your specific needs and budget.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="{{ route('contact') }}" 
-               class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
-                Get Expert Advice
-            </a>
-            <a href="{{ route('home') }}" 
-               class="border-2 border-blue-600 text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-colors duration-200">
-                Learn More About Us
-            </a>
+            @endif
         </div>
-    </div>
-</section>
+    </section>
+
+
 @endsection
 
 @push('styles')
-<style>
-    .line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-</style>
+    <style>
+        .selected-category {
+            position: relative;
+        }
+
+        .selected-category::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background-color: #ec4899;
+            border-radius: 50%;
+        }
+
+        /* Category pills horizontal scroll */
+        .flex.items-center.gap-4.overflow-x-auto {
+            min-height: 80px;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scroll-behavior: smooth;
+        }
+
+        /* Hide scrollbar for webkit browsers */
+        .flex.items-center.gap-4.overflow-x-auto::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Ensure all category items don't shrink */
+        .flex.items-center.gap-4.overflow-x-auto>* {
+            flex-shrink: 0;
+        }
+
+        /* Grid Toggle Styles */
+        .grid-toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+        }
+
+        .grid-toggle-btn:hover {
+            background-color: #f3f4f6;
+        }
+
+        .grid-toggle-btn.active {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Grid transition animation */
+        #products-grid {
+            transition: all 0.3s ease;
+        }
+
+        /* Mobile specific styles */
+        @media (max-width: 768px) {
+            .grid-toggle-btn {
+                width: 36px;
+                height: 36px;
+            }
+
+            .grid-toggle-btn svg {
+                width: 16px;
+                height: 16px;
+            }
+        }
+    </style>
 @endpush
 
 @push('scripts')
-<script>
-function toggleSortDirection() {
-    const sortDirectionInput = document.querySelector('input[name="sort_direction"]');
-    const sortDirectionText = document.getElementById('sort-direction-text');
-    const sortDirectionIcon = document.getElementById('sort-direction-icon');
-    
-    const currentDirection = sortDirectionInput.value;
-    const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
-    
-    sortDirectionInput.value = newDirection;
-    sortDirectionText.textContent = newDirection === 'desc' ? 'Descending' : 'Ascending';
-    
-    if (newDirection === 'desc') {
-        sortDirectionIcon.classList.add('rotate-180');
-    } else {
-        sortDirectionIcon.classList.remove('rotate-180');
-    }
-    
-    // Submit the form
-    document.querySelector('form').submit();
-}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize grid view from localStorage or default to 2 columns
+            const savedGridView = localStorage.getItem('gridView') || '2';
+            setGridView(parseInt(savedGridView));
 
-// Auto-submit form when select values change
-document.addEventListener('DOMContentLoaded', function() {
-    const selects = document.querySelectorAll('#category, #sort_by');
-    selects.forEach(select => {
-        select.addEventListener('change', function() {
-            document.querySelector('form').submit();
+            // Category pills are now using flex-wrap, no scroll needed
         });
-    });
-    
-    // Initialize comparison functionality
-    updateComparisonButtons();
-});
 
-// Comparison functionality
-function addToComparison(productId) {
-    fetch('{{ route("products.compare.add") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: JSON.stringify({
-            product_id: productId
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            updateComparisonButtons();
-            updateComparisonWidget(data.count);
-            showNotification(data.message, 'success');
-        } else {
-            showNotification(data.error, 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showNotification('Failed to add product to comparison', 'error');
-    });
-}
+        function setGridView(columns) {
+            const grid = document.getElementById('products-grid');
 
-function updateComparisonButtons() {
-    // Get current comparison products
-    fetch('{{ route("products.compare.products") }}')
-    .then(response => response.json())
-    .then(data => {
-        const comparisonIds = data.products.map(p => p.id);
-        
-        // Update all compare buttons
-        document.querySelectorAll('.compare-btn').forEach(btn => {
-            const productId = parseInt(btn.getAttribute('onclick').match(/\d+/)[0]);
-            
-            if (comparisonIds.includes(productId)) {
-                btn.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-                btn.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
-                btn.title = 'Added to comparison';
-                btn.disabled = true;
+            // Desktop buttons
+            const btn2 = document.getElementById('grid-2-btn');
+            const btn4 = document.getElementById('grid-4-btn');
+
+            // Mobile buttons
+            const btn1 = document.getElementById('grid-1-btn');
+            const btn2Mobile = document.getElementById('grid-2-mobile-btn');
+
+            if (!grid) return;
+
+            // Remove all grid classes
+            grid.className = grid.className.replace(/grid-cols-\d+/g, '');
+            grid.className = grid.className.replace(/md:grid-cols-\d+/g, '');
+            grid.className = grid.className.replace(/lg:grid-cols-\d+/g, '');
+            grid.className = grid.className.replace(/xl:grid-cols-\d+/g, '');
+
+            // Reset all button styles
+            [btn1, btn2Mobile, btn2, btn4].forEach(btn => {
+                if (btn) {
+                    btn.classList.remove('bg-white', 'shadow-sm');
+                    btn.classList.add('hover:bg-gray-200');
+                }
+            });
+
+            if (columns === 1) {
+                // 1 column layout (mobile only)
+                grid.classList.add('grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-2', 'xl:grid-cols-2');
+                if (btn1) {
+                    btn1.classList.add('bg-white', 'shadow-sm');
+                    btn1.classList.remove('hover:bg-gray-200');
+                }
+            } else if (columns === 2) {
+                // 2 column layout
+                grid.classList.add('grid-cols-2', 'md:grid-cols-2', 'lg:grid-cols-2', 'xl:grid-cols-2');
+                if (btn2) {
+                    btn2.classList.add('bg-white', 'shadow-sm');
+                    btn2.classList.remove('hover:bg-gray-200');
+                }
+                if (btn2Mobile) {
+                    btn2Mobile.classList.add('bg-white', 'shadow-sm');
+                    btn2Mobile.classList.remove('hover:bg-gray-200');
+                }
             } else {
-                btn.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700');
-                btn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-                btn.title = 'Add to comparison';
-                btn.disabled = false;
+                // 4 column layout (desktop only)
+                grid.classList.add('grid-cols-2', 'md:grid-cols-2', 'lg:grid-cols-3', 'xl:grid-cols-4');
+                if (btn4) {
+                    btn4.classList.add('bg-white', 'shadow-sm');
+                    btn4.classList.remove('hover:bg-gray-200');
+                }
             }
-        });
-    });
-}
 
-function updateComparisonWidget(count) {
-    // Update comparison widget if it exists
-    const widget = document.getElementById('comparison-widget');
-    if (widget) {
-        const countElement = widget.querySelector('.comparison-count');
-        if (countElement) {
-            countElement.textContent = count;
+            // Save preference
+            localStorage.setItem('gridView', columns.toString());
         }
-        
-        if (count > 0) {
-            widget.classList.remove('hidden');
-        } else {
-            widget.classList.add('hidden');
-        }
-    }
-}
 
-function showNotification(message, type) {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
-        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-    }`;
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    
-    // Remove notification after 3 seconds
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-</script>
+        function toggleCategory(categoryId) {
+            // Get current URL parameters
+            const url = new URL(window.location);
+            let categories = url.searchParams.getAll('categories[]');
+
+            // Convert to numbers for comparison
+            categories = categories.map(id => parseInt(id));
+            categoryId = parseInt(categoryId);
+
+            // Toggle category
+            if (categories.includes(categoryId)) {
+                // Remove category
+                categories = categories.filter(id => id !== categoryId);
+            } else {
+                // Add category
+                categories.push(categoryId);
+            }
+
+            // Clear existing categories parameters
+            url.searchParams.delete('categories[]');
+
+            // Add new categories
+            categories.forEach(id => {
+                url.searchParams.append('categories[]', id);
+            });
+
+            // Remove page parameter to start from page 1
+            url.searchParams.delete('page');
+
+            // Navigate to new URL
+            window.location.href = url.toString();
+        }
+    </script>
 @endpush

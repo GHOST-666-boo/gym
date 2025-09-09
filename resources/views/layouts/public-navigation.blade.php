@@ -6,12 +6,16 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('home') }}" class="flex items-center">
-                        <div class="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
-                            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                        </div>
-                        <span class="text-xl font-bold text-gray-900">Gym Machines</span>
+                        @if(site_logo() && site_logo() !== asset('images/default-logo.png'))
+                            <img src="{{ site_logo() }}" alt="{{ site_name() }} Logo" class="h-8 w-auto mr-3">
+                        @else
+                            <div class="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                                <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                        @endif
+                        <span class="text-xl font-bold text-gray-900">{{ site_name() }}</span>
                     </a>
                 </div>
 
@@ -22,7 +26,7 @@
                         Home
                     </a>
                     <a href="{{ route('products.index') }}" 
-                       class="@if(request()->routeIs('products.*') && !request()->routeIs('products.compare')) text-blue-600 border-b-2 border-blue-600 @else text-gray-700 hover:text-blue-600 @endif px-3 py-2 text-sm font-medium transition-colors duration-200">
+                       class="@if(request()->routeIs('products.*')) text-blue-600 border-b-2 border-blue-600 @else text-gray-700 hover:text-blue-600 @endif px-3 py-2 text-sm font-medium transition-colors duration-200">
                         Products
                     </a>
                     
@@ -58,11 +62,7 @@
                     </div>
                     @endif
                     
-                    <a href="{{ route('products.compare') }}" 
-                       class="@if(request()->routeIs('products.compare')) text-blue-600 border-b-2 border-blue-600 @else text-gray-700 hover:text-blue-600 @endif px-3 py-2 text-sm font-medium transition-colors duration-200 relative">
-                        Compare
-                        <span id="nav-comparison-count" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
-                    </a>
+
                     <a href="{{ route('contact') }}" 
                        class="@if(request()->routeIs('contact.*')) text-blue-600 border-b-2 border-blue-600 @else text-gray-700 hover:text-blue-600 @endif px-3 py-2 text-sm font-medium transition-colors duration-200">
                         Contact
@@ -149,7 +149,7 @@
                 Home
             </a>
             <a href="{{ route('products.index') }}" 
-               class="@if(request()->routeIs('products.*') && !request()->routeIs('products.compare')) bg-blue-100 text-blue-600 @else text-gray-700 hover:bg-gray-100 hover:text-blue-600 @endif block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
+               class="@if(request()->routeIs('products.*')) bg-blue-100 text-blue-600 @else text-gray-700 hover:bg-gray-100 hover:text-blue-600 @endif block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
                 Products
             </a>
             
@@ -166,11 +166,7 @@
                 </div>
             @endif
             
-            <a href="{{ route('products.compare') }}" 
-               class="@if(request()->routeIs('products.compare')) bg-blue-100 text-blue-600 @else text-gray-700 hover:bg-gray-100 hover:text-blue-600 @endif block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 relative">
-                Compare
-                <span id="mobile-nav-comparison-count" class="hidden absolute top-2 right-3 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
-            </a>
+
             <a href="{{ route('contact') }}" 
                class="@if(request()->routeIs('contact.*')) bg-blue-100 text-blue-600 @else text-gray-700 hover:bg-gray-100 hover:text-blue-600 @endif block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
                 Contact

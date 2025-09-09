@@ -24,25 +24,25 @@
             <!-- Products Table -->
             <div class="overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="admin-table">
+                    <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col" class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Product
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col" class="hidden md:table-cell px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Category
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col" class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Price
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col" class="hidden lg:table-cell px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Stock
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col" class="hidden xl:table-cell px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Created
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col" class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Actions
                                 </th>
                             </tr>
@@ -50,7 +50,7 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($products as $product)
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 lg:px-6 py-4 max-w-[300px]">
                                         <div class="flex items-center">
                                             @php
                                                 $thumbnailUrl = null;
@@ -61,23 +61,32 @@
                                                 }
                                             @endphp
                                             @if($thumbnailUrl)
-                                                <img class="h-12 w-12 rounded-lg object-cover mr-4" 
+                                                <img class="h-10 w-10 lg:h-12 lg:w-12 rounded-lg object-cover mr-3 lg:mr-4 flex-shrink-0" 
                                                      src="{{ $thumbnailUrl }}" 
                                                      alt="{{ $product->name }}">
                                             @else
-                                                <div class="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center mr-4">
-                                                    <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <div class="h-10 w-10 lg:h-12 lg:w-12 rounded-lg bg-gray-200 flex items-center justify-center mr-3 lg:mr-4 flex-shrink-0">
+                                                    <svg class="h-5 w-5 lg:h-6 lg:w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                                     </svg>
                                                 </div>
                                             @endif
-                                            <div>
-                                                <div class="text-sm font-medium text-gray-900">{{ $product->name }}</div>
-                                                <div class="text-sm text-gray-500">{{ Str::limit($product->short_description, 60) }}</div>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="text-sm font-medium text-gray-900 truncate">{{ $product->name }}</div>
+                                                <div class="text-sm text-gray-500 truncate md:hidden">{{ Str::limit($product->short_description, 30) }}</div>
+                                                <div class="text-sm text-gray-500 truncate hidden md:block">{{ Str::limit($product->short_description, 60) }}</div>
+                                                <!-- Show category on mobile -->
+                                                <div class="md:hidden mt-1">
+                                                    @if($product->category)
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                            {{ $product->category->name }}
+                                                        </span>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="hidden md:table-cell px-4 lg:px-6 py-4 whitespace-nowrap">
                                         @if($product->category)
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                                 {{ $product->category->name }}
@@ -86,10 +95,10 @@
                                             <span class="text-gray-400 text-sm">No category</span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                                         ${{ number_format($product->price, 2) }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="hidden lg:table-cell px-4 lg:px-6 py-4 whitespace-nowrap">
                                         @if($product->track_inventory)
                                             <div class="flex items-center space-x-2">
                                                 <span class="text-sm font-medium text-gray-900">{{ $product->stock_quantity ?? 0 }}</span>
@@ -103,16 +112,16 @@
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td class="hidden xl:table-cell px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         <div>{{ $product->created_at->format('M j, Y') }}</div>
                                         <div class="text-xs text-gray-400">{{ $product->created_at->diffForHumans() }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex items-center space-x-3">
+                                    <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex items-center space-x-2 lg:space-x-3">
                                             <!-- View Product -->
                                             <a href="{{ route('products.show', $product->slug) }}" 
                                                target="_blank"
-                                               class="text-green-600 hover:text-green-900 flex items-center"
+                                               class="text-green-600 hover:text-green-900 p-1"
                                                title="View on website">
                                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -122,7 +131,7 @@
                                             
                                             <!-- Edit Product -->
                                             <a href="{{ route('admin.products.edit', $product) }}" 
-                                               class="text-blue-600 hover:text-blue-900 flex items-center"
+                                               class="text-blue-600 hover:text-blue-900 p-1"
                                                title="Edit product">
                                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -132,7 +141,7 @@
                                             <!-- Delete Product -->
                                             <button type="button" 
                                                     onclick="confirmDelete('{{ $product->slug }}', '{{ addslashes($product->name) }}')"
-                                                    class="text-red-600 hover:text-red-900 flex items-center"
+                                                    class="text-red-600 hover:text-red-900 p-1"
                                                     title="Delete product">
                                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -148,7 +157,7 @@
                 
                 <!-- Pagination -->
                 @if($products->hasPages())
-                    <div class="mt-6 px-6 py-3 border-t border-gray-200">
+                    <div class="mt-6 px-4 lg:px-6 py-3 border-t border-gray-200">
                         {{ $products->links() }}
                     </div>
                 @endif

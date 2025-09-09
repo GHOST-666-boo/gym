@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Contact Us - Gym Machines')
+@section('title', 'Contact Us - ' . site_name())
 @section('description', 'Get in touch with our gym equipment experts. Contact us for quotes, product information, or any questions about our professional fitness equipment.')
 
 @section('content')
@@ -136,80 +136,151 @@
                     <h2 class="text-2xl font-bold text-gray-900 mb-6">Get in Touch</h2>
                     <div class="space-y-6">
                         <!-- Phone -->
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <div class="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                                    </svg>
+                        @if(business_phone())
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-semibold text-gray-900">Phone</h3>
+                                    <p class="text-gray-600">
+                                        <a href="tel:{{ business_phone() }}" class="hover:text-blue-600 transition-colors duration-200">{{ business_phone() }}</a>
+                                    </p>
+                                    @if(business_hours())
+                                        <p class="text-sm text-gray-500">{{ business_hours() }}</p>
+                                    @else
+                                        <p class="text-sm text-gray-500">Mon-Fri 9AM-6PM EST</p>
+                                    @endif
                                 </div>
                             </div>
-                            <div class="ml-4">
-                                <h3 class="text-lg font-semibold text-gray-900">Phone</h3>
-                                <p class="text-gray-600">+1 (555) 123-4567</p>
-                                <p class="text-sm text-gray-500">Mon-Fri 9AM-6PM EST</p>
-                            </div>
-                        </div>
+                        @endif
 
                         <!-- Email -->
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <div class="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                    </svg>
+                        @if(business_email())
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-semibold text-gray-900">Email</h3>
+                                    <p class="text-gray-600">
+                                        <a href="mailto:{{ business_email() }}" class="hover:text-blue-600 transition-colors duration-200">{{ business_email() }}</a>
+                                    </p>
+                                    <p class="text-sm text-gray-500">We respond within 24 hours</p>
                                 </div>
                             </div>
-                            <div class="ml-4">
-                                <h3 class="text-lg font-semibold text-gray-900">Email</h3>
-                                <p class="text-gray-600">info@gymmachines.com</p>
-                                <p class="text-sm text-gray-500">We respond within 24 hours</p>
-                            </div>
-                        </div>
+                        @endif
 
                         <!-- Address -->
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <div class="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
+                        @if(business_address())
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-semibold text-gray-900">Address</h3>
+                                    <p class="text-gray-600">
+                                        {!! nl2br(e(business_address())) !!}
+                                    </p>
                                 </div>
                             </div>
-                            <div class="ml-4">
-                                <h3 class="text-lg font-semibold text-gray-900">Address</h3>
-                                <p class="text-gray-600">
-                                    123 Fitness Street<br>
-                                    Gym City, GC 12345<br>
-                                    United States
-                                </p>
+                        @endif
+                        
+                        @if(!business_phone() && !business_email() && !business_address())
+                            <!-- Fallback contact info if no settings are configured -->
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-semibold text-gray-900">Phone</h3>
+                                    <p class="text-gray-600">+1 (555) 123-4567</p>
+                                    <p class="text-sm text-gray-500">Mon-Fri 9AM-6PM EST</p>
+                                </div>
                             </div>
-                        </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-semibold text-gray-900">Email</h3>
+                                    <p class="text-gray-600">info@gymmachines.com</p>
+                                    <p class="text-sm text-gray-500">We respond within 24 hours</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-semibold text-gray-900">Address</h3>
+                                    <p class="text-gray-600">
+                                        123 Fitness Street<br>
+                                        Gym City, GC 12345<br>
+                                        United States
+                                    </p>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
                 <!-- Business Hours -->
-                <div class="bg-gray-50 rounded-lg p-8">
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">Business Hours</h3>
-                    <div class="space-y-2">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Monday - Friday</span>
-                            <span class="text-gray-900 font-medium">9:00 AM - 6:00 PM</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Saturday</span>
-                            <span class="text-gray-900 font-medium">10:00 AM - 4:00 PM</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Sunday</span>
-                            <span class="text-gray-900 font-medium">Closed</span>
+                @if(business_hours())
+                    <div class="bg-gray-50 rounded-lg p-8">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">Business Hours</h3>
+                        <div class="text-gray-600">
+                            {!! nl2br(e(business_hours())) !!}
                         </div>
                     </div>
-                    <p class="text-sm text-gray-500 mt-4">
-                        All times are Eastern Standard Time (EST)
-                    </p>
-                </div>
+                @else
+                    <div class="bg-gray-50 rounded-lg p-8">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">Business Hours</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Monday - Friday</span>
+                                <span class="text-gray-900 font-medium">9:00 AM - 6:00 PM</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Saturday</span>
+                                <span class="text-gray-900 font-medium">10:00 AM - 4:00 PM</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Sunday</span>
+                                <span class="text-gray-900 font-medium">Closed</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-4">
+                            All times are Eastern Standard Time (EST)
+                        </p>
+                    </div>
+                @endif
 
                 <!-- FAQ Link -->
                 <div class="bg-white border border-gray-200 rounded-lg p-6">
@@ -240,10 +311,17 @@
             Our team of fitness equipment experts is standing by to help you choose the perfect machines for your needs and budget.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="tel:+15551234567" 
-               class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200">
-                Call Now: (555) 123-4567
-            </a>
+            @if(business_phone())
+                <a href="tel:{{ business_phone() }}" 
+                   class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200">
+                    Call Now: {{ business_phone() }}
+                </a>
+            @else
+                <a href="tel:+15551234567" 
+                   class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200">
+                    Call Now: (555) 123-4567
+                </a>
+            @endif
             <a href="{{ route('products.index') }}" 
                class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors duration-200">
                 View Our Products

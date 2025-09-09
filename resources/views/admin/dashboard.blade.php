@@ -16,8 +16,26 @@
 
 @section('content')
     <div class="p-6">
+        <!-- Image Protection Status Banner -->
+        @if(!$imageProtectionStatus['protection_enabled'] && !$imageProtectionStatus['watermark_enabled'])
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-medium text-yellow-800">Image Protection Disabled</h3>
+                        <p class="text-sm text-yellow-700 mt-1">Your product images are not protected. Consider enabling image protection and watermarking for better security.</p>
+                    </div>
+                    <a href="{{ route('admin.settings.index') }}#watermark-tab" class="ml-4 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                        Enable Protection
+                    </a>
+                </div>
+            </div>
+        @endif
+
         <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
             <!-- Total Products -->
             <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
                 <div class="flex items-center justify-between">
@@ -109,10 +127,38 @@
                     @endif
                 </div>
             </div>
+
+            <!-- Image Protection Status -->
+            <div class="bg-gradient-to-r from-{{ $imageProtectionStatus['protection_enabled'] || $imageProtectionStatus['watermark_enabled'] ? 'green' : 'gray' }}-500 to-{{ $imageProtectionStatus['protection_enabled'] || $imageProtectionStatus['watermark_enabled'] ? 'green' : 'gray' }}-600 rounded-lg p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-{{ $imageProtectionStatus['protection_enabled'] || $imageProtectionStatus['watermark_enabled'] ? 'green' : 'gray' }}-100 text-sm font-medium">Image Protection</p>
+                        <p class="text-2xl font-bold">
+                            @if($imageProtectionStatus['protection_enabled'] && $imageProtectionStatus['watermark_enabled'])
+                                Full
+                            @elseif($imageProtectionStatus['protection_enabled'] || $imageProtectionStatus['watermark_enabled'])
+                                Partial
+                            @else
+                                Disabled
+                            @endif
+                        </p>
+                    </div>
+                    <div class="bg-{{ $imageProtectionStatus['protection_enabled'] || $imageProtectionStatus['watermark_enabled'] ? 'green' : 'gray' }}-400 bg-opacity-30 rounded-full p-3">
+                        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{{ route('admin.settings.index') }}#watermark-tab" class="text-{{ $imageProtectionStatus['protection_enabled'] || $imageProtectionStatus['watermark_enabled'] ? 'green' : 'gray' }}-100 hover:text-white text-sm font-medium">
+                        Manage Settings →
+                    </a>
+                </div>
+            </div>
         </div>
 
         <!-- Analytics Overview -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
             <!-- Today's Analytics -->
             <div class="bg-white rounded-lg border border-gray-200 p-6">
                 <div class="flex items-center justify-between mb-4">
@@ -197,6 +243,58 @@
                     @empty
                         <p class="text-sm text-gray-500 text-center py-2">No views yet</p>
                     @endforelse
+                </div>
+            </div>
+
+            <!-- Image Protection Details -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Protection Status</h3>
+                    <a href="{{ route('admin.settings.index') }}#watermark-tab" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        Configure →
+                    </a>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Image Protection</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $imageProtectionStatus['protection_enabled'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                            {{ $imageProtectionStatus['protection_enabled'] ? 'Enabled' : 'Disabled' }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Watermarking</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $imageProtectionStatus['watermark_enabled'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                            {{ $imageProtectionStatus['watermark_enabled'] ? 'Enabled' : 'Disabled' }}
+                        </span>
+                    </div>
+                    @if($imageProtectionStatus['protection_enabled'])
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Right-click Block</span>
+                            <span class="text-sm font-semibold {{ $imageProtectionStatus['protection_methods']['right_click'] ? 'text-green-600' : 'text-gray-400' }}">
+                                {{ $imageProtectionStatus['protection_methods']['right_click'] ? 'Active' : 'Inactive' }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Drag Protection</span>
+                            <span class="text-sm font-semibold {{ $imageProtectionStatus['protection_methods']['drag_drop'] ? 'text-green-600' : 'text-gray-400' }}">
+                                {{ $imageProtectionStatus['protection_methods']['drag_drop'] ? 'Active' : 'Inactive' }}
+                            </span>
+                        </div>
+                    @endif
+                    @if($imageProtectionStatus['watermark_enabled'])
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Watermark Text</span>
+                            <span class="text-sm font-semibold {{ $imageProtectionStatus['has_watermark_text'] ? 'text-green-600' : 'text-gray-400' }}">
+                                {{ $imageProtectionStatus['has_watermark_text'] ? 'Set' : 'Not Set' }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Watermark Logo</span>
+                            <span class="text-sm font-semibold {{ $imageProtectionStatus['has_watermark_logo'] ? 'text-green-600' : 'text-gray-400' }}">
+                                {{ $imageProtectionStatus['has_watermark_logo'] ? 'Uploaded' : 'None' }}
+                            </span>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

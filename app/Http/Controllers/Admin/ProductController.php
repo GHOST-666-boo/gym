@@ -56,27 +56,52 @@ class ProductController extends Controller
         try {
             $validated = $request->validated();
 
-            // Handle image upload
-            if ($request->hasFile('image')) {
-                $uploadResult = $this->fileUploadService->uploadProductImage($request->file('image'));
-                
-                if (!$uploadResult['success']) {
-                    return redirect()->back()
-                        ->with('error', $uploadResult['message'])
-                        ->withInput();
-                }
-                
-                $validated['image_path'] = $uploadResult['path'];
-            }
-
-            // Remove the image field from validated data as we use image_path
-            unset($validated['image']);
+            // Remove image fields from validated data as we handle them separately
+            unset($validated['image'], $validated['images']);
 
             $product = Product::create($validated);
 
+            $messages = [];
+
+            // Handle single image upload (legacy support)
+            if ($request->hasFile('image')) {
+                $uploadResult = $this->fileUploadService->uploadProductImage($request->file('image'));
+                
+                if ($uploadResult['success']) {
+                    $validated['image_path'] = $uploadResult['path'];
+                    $product->update(['image_path' => $uploadResult['path']]);
+                    $messages[] = 'Main image uploaded successfully.';
+                } else {
+                    $messages[] = 'Main image upload failed: ' . $uploadResult['message'];
+                }
+            }
+
+            // Handle multiple images upload
+            if ($request->hasFile('images')) {
+                $uploadResult = $this->fileUploadService->uploadMultipleProductImages(
+                    $request->file('images'), 
+                    $product->id
+                );
+                
+                $messages = array_merge($messages, $uploadResult['messages']);
+                
+                if ($uploadResult['total_skipped'] > 0) {
+                    $skippedDetails = [];
+                    foreach ($uploadResult['skipped'] as $skipped) {
+                        $skippedDetails[] = "{$skipped['filename']}: {$skipped['reason']}";
+                    }
+                    $messages[] = 'Skipped files: ' . implode('; ', $skippedDetails);
+                }
+            }
+
+            $successMessage = "Product '{$product->name}' has been created successfully.";
+            if (!empty($messages)) {
+                $successMessage .= ' ' . implode(' ', $messages);
+            }
+
             return redirect()
                 ->route('admin.products.index')
-                ->with('success', "Product '{$product->name}' has been created successfully.");
+                ->with('success', $successMessage);
                 
         } catch (\Exception $e) {
             return redirect()->back()
@@ -113,30 +138,54 @@ class ProductController extends Controller
         try {
             $validated = $request->validated();
 
-            // Handle image upload
+            // Remove image fields from validated data as we handle them separately
+            unset($validated['image'], $validated['images']);
+
+            $product->update($validated);
+
+            $messages = [];
+
+            // Handle single image upload (legacy support)
             if ($request->hasFile('image')) {
                 $uploadResult = $this->fileUploadService->uploadProductImage(
                     $request->file('image'), 
                     $product->image_path
                 );
                 
-                if (!$uploadResult['success']) {
-                    return redirect()->back()
-                        ->with('error', $uploadResult['message'])
-                        ->withInput();
+                if ($uploadResult['success']) {
+                    $product->update(['image_path' => $uploadResult['path']]);
+                    $messages[] = 'Main image updated successfully.';
+                } else {
+                    $messages[] = 'Main image update failed: ' . $uploadResult['message'];
                 }
-                
-                $validated['image_path'] = $uploadResult['path'];
             }
 
-            // Remove the image field from validated data as we use image_path
-            unset($validated['image']);
+            // Handle multiple images upload
+            if ($request->hasFile('images')) {
+                $uploadResult = $this->fileUploadService->uploadMultipleProductImages(
+                    $request->file('images'), 
+                    $product->id
+                );
+                
+                $messages = array_merge($messages, $uploadResult['messages']);
+                
+                if ($uploadResult['total_skipped'] > 0) {
+                    $skippedDetails = [];
+                    foreach ($uploadResult['skipped'] as $skipped) {
+                        $skippedDetails[] = "{$skipped['filename']}: {$skipped['reason']}";
+                    }
+                    $messages[] = 'Skipped files: ' . implode('; ', $skippedDetails);
+                }
+            }
 
-            $product->update($validated);
+            $successMessage = "Product '{$product->name}' has been updated successfully.";
+            if (!empty($messages)) {
+                $successMessage .= ' ' . implode(' ', $messages);
+            }
 
             return redirect()
                 ->route('admin.products.index')
-                ->with('success', "Product '{$product->name}' has been updated successfully.");
+                ->with('success', $successMessage);
                 
         } catch (\Exception $e) {
             return redirect()->back()

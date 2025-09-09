@@ -14,7 +14,7 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Favicon -->
-        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+        <link rel="icon" type="image/x-icon" href="{{ site_favicon() }}">
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -27,12 +27,12 @@
             @include('layouts.admin-sidebar')
 
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col">
+            <div class="flex-1 flex flex-col min-w-0">
                 <!-- Top Navigation -->
                 @include('layouts.admin-navigation')
 
                 <!-- Page Content -->
-                <main class="flex-1 p-6">
+                <main class="flex-1 p-4 lg:p-6 overflow-hidden">
                     <!-- Page Header -->
                     @if(isset($header) || View::hasSection('header'))
                         <div class="mb-6">
@@ -81,7 +81,7 @@
                     @endif
 
                     <!-- Main Content -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 min-w-0 overflow-hidden">
                         @isset($slot)
                             {{ $slot }}
                         @else

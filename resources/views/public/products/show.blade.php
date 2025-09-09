@@ -37,12 +37,22 @@
                 <!-- Image Carousel -->
                 <div class="relative">
                     <!-- Main Image Container -->
-                    <div class="relative w-full h-96 bg-gray-200 rounded-lg overflow-hidden cursor-pointer" id="imageCarousel" onclick="openLightbox(currentImageIndex)">
+                    <div class="relative w-full bg-gray-100 rounded-lg overflow-hidden cursor-pointer product-gallery shadow-md" id="imageCarousel" onclick="openLightbox(currentImageIndex)" style="min-height: 300px;">
                         @foreach($allImages as $index => $image)
-                            <div class="carousel-slide {{ $index === 0 ? 'active' : '' }} absolute inset-0 transition-opacity duration-500 ease-in-out {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}">
-                                <img src="{{ $image['url'] }}" 
-                                     alt="{{ $image['alt'] }}" 
-                                     class="w-full h-full object-cover">
+                            <div class="carousel-slide {{ $index === 0 ? 'active' : '' }} absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-in-out {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}" style="padding: 20px;">
+                                @php
+                                    // Extract image path from URL for watermarking
+                                    $imagePath = str_replace(asset('storage/'), '', $image['url']);
+                                @endphp
+                                <x-product-image 
+                                    :image-path="$imagePath"
+                                    :alt="$image['alt']"
+                                    class="w-auto h-auto max-w-full max-h-full object-contain"
+                                    :width="800"
+                                    :height="600"
+                                    :lazy="false"
+                                    style="max-height: calc(100vh - 200px);"
+                                />
                             </div>
                         @endforeach
                         
@@ -84,12 +94,21 @@
                             @foreach($allImages as $index => $image)
                                 <button onclick="showImage({{ $index }})" 
                                         ondblclick="openLightbox({{ $index }})"
-                                        class="thumbnail-btn flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border-2 transition-all duration-200 {{ $index === 0 ? 'border-blue-500' : 'border-gray-300' }} relative group"
+                                        class="thumbnail-btn flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border-2 transition-all duration-200 {{ $index === 0 ? 'border-blue-500' : 'border-gray-300' }} relative group product-gallery"
                                         data-index="{{ $index }}"
                                         title="Click to select, double-click to enlarge">
-                                    <img src="{{ $image['url'] }}" 
-                                         alt="{{ $image['alt'] }}" 
-                                         class="w-full h-full object-cover">
+                                    @php
+                                        $imagePath = str_replace(asset('storage/'), '', $image['url']);
+                                    @endphp
+                                    <x-product-image 
+                                        :image-path="$imagePath"
+                                        :alt="$image['alt']"
+                                        class="w-full h-full object-cover"
+                                        :width="80"
+                                        :height="80"
+                                        :lazy="false"
+                                        :watermarked="false"
+                                    />
                                     <!-- Hover overlay -->
                                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
                                         <svg class="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,8 +130,13 @@
                     @endif
                 </div>
             @else
-                <div class="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
-                    <span class="text-gray-500">No image available</span>
+                <div class="w-full h-80 sm:h-96 bg-gray-100 rounded-lg flex items-center justify-center shadow-md">
+                    <div class="text-center text-gray-500">
+                        <svg class="w-16 h-16 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <span class="text-sm">No image available</span>
+                    </div>
                 </div>
             @endif
         </div>
@@ -132,66 +156,83 @@
 
     <!-- Lightbox Modal -->
     @if(count($allImages ?? []) > 0)
-    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden flex items-center justify-center p-4">
-        <!-- Modal Content -->
-        <div class="relative max-w-7xl max-h-full w-full h-full flex items-center justify-center">
-            <!-- Close Button -->
-            <button onclick="closeLightbox()" 
-                    class="absolute top-4 right-4 z-10 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all duration-200">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-95 z-50 hidden">
+        <!-- Close Button -->
+        <button onclick="closeLightbox()" 
+                class="absolute top-4 right-4 z-30 bg-black bg-opacity-70 text-white p-3 rounded-full hover:bg-opacity-90 transition-all duration-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        
+        <!-- Main Image Container -->
+        <div class="absolute inset-0 flex items-center justify-center pb-24 px-16 pt-16">
+            @foreach($allImages as $index => $image)
+                <div class="lightbox-slide {{ $index === 0 ? 'active' : '' }} absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-in-out {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}" style="padding: 80px 80px 120px 80px;">
+                    @php
+                        $imagePath = str_replace(asset('storage/'), '', $image['url']);
+                    @endphp
+                    <x-product-image 
+                        :image-path="$imagePath"
+                        :alt="$image['alt']"
+                        class="max-w-full max-h-full object-contain"
+                        :width="1200"
+                        :height="800"
+                        :lazy="false"
+                        style="width: auto; height: auto; max-width: calc(100vw - 160px); max-height: calc(100vh - 200px);"
+                    />
+                </div>
+            @endforeach
+        </div>
+        
+        @if(count($allImages) > 1)
+            <!-- Navigation Buttons -->
+            <button onclick="previousLightboxImage()" 
+                    class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-70 text-white p-3 rounded-full hover:bg-opacity-90 transition-all duration-200 z-20">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
             </button>
             
-            <!-- Main Image -->
-            <div class="relative w-full h-full flex items-center justify-center">
-                @foreach($allImages as $index => $image)
-                    <div class="lightbox-slide {{ $index === 0 ? 'active' : '' }} absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-in-out {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}">
-                        <img src="{{ $image['url'] }}" 
-                             alt="{{ $image['alt'] }}" 
-                             class="max-w-full max-h-full object-contain">
-                    </div>
-                @endforeach
-                
-                @if(count($allImages) > 1)
-                    <!-- Previous Button -->
-                    <button onclick="previousLightboxImage()" 
-                            class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all duration-200">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
-                    </button>
-                    
-                    <!-- Next Button -->
-                    <button onclick="nextLightboxImage()" 
-                            class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition-all duration-200">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </button>
-                @endif
-            </div>
+            <button onclick="nextLightboxImage()" 
+                    class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-70 text-white p-3 rounded-full hover:bg-opacity-90 transition-all duration-200 z-20">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
             
-            @if(count($allImages) > 1)
-                <!-- Image Counter -->
-                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-4 py-2 rounded-full text-lg">
-                    <span id="lightboxImageNumber">1</span> / {{ count($allImages) }}
-                </div>
-                
+            <!-- Bottom Controls -->
+            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
                 <!-- Thumbnail Navigation -->
-                <div class="absolute bottom-4 left-4 right-4 flex justify-center space-x-2 overflow-x-auto pb-2">
+                <div class="flex justify-center space-x-2 mb-4 overflow-x-auto pb-2">
                     @foreach($allImages as $index => $image)
                         <button onclick="showLightboxImage({{ $index }})" 
                                 class="lightbox-thumbnail-btn flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border-2 transition-all duration-200 {{ $index === 0 ? 'border-white' : 'border-gray-500' }}"
                                 data-index="{{ $index }}">
-                            <img src="{{ $image['url'] }}" 
-                                 alt="{{ $image['alt'] }}" 
-                                 class="w-full h-full object-cover">
+                            @php
+                                $imagePath = str_replace(asset('storage/'), '', $image['url']);
+                            @endphp
+                            <x-product-image 
+                                :image-path="$imagePath"
+                                :alt="$image['alt']"
+                                class="w-full h-full object-cover"
+                                :width="64"
+                                :height="64"
+                                :lazy="false"
+                                :watermarked="false"
+                            />
                         </button>
                     @endforeach
                 </div>
-            @endif
-        </div>
+                
+                <!-- Image Counter -->
+                <div class="flex justify-center">
+                    <div class="bg-black bg-opacity-70 text-white px-4 py-2 rounded-full text-lg font-medium">
+                        <span id="lightboxImageNumber">1</span> / {{ count($allImages) }}
+                    </div>
+                </div>
+            </div>
+        @endif
         
         <!-- Click outside to close -->
         <div class="absolute inset-0 -z-10" onclick="closeLightbox()"></div>
@@ -205,6 +246,31 @@
         </div>
     </div>
 </div>
+
+@push('styles')
+<style>
+/* ONLY for lightbox (full screen) - proper aspect ratio */
+#lightbox .lightbox-slide img {
+    width: auto !important;
+    height: auto !important;
+    max-width: calc(100vw - 160px) !important;
+    max-height: calc(100vh - 200px) !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+/* Keep main carousel as it was - object-cover for consistent layout */
+.carousel-slide img {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: calc(100% - 40px);
+    object-fit: contain;
+}
+</style>
+@endpush
 
 @push('scripts')
 <script>
@@ -286,6 +352,7 @@ document.addEventListener('keydown', function(e) {
 let startX = null;
 let startY = null;
 
+// Carousel swipe support
 document.getElementById('imageCarousel')?.addEventListener('touchstart', function(e) {
     const firstTouch = e.touches[0];
     startX = firstTouch.clientX;
@@ -316,6 +383,37 @@ document.getElementById('imageCarousel')?.addEventListener('touchend', function(
     startY = null;
 });
 
+// Lightbox swipe support
+document.getElementById('lightbox')?.addEventListener('touchstart', function(e) {
+    const firstTouch = e.touches[0];
+    startX = firstTouch.clientX;
+    startY = firstTouch.clientY;
+});
+
+document.getElementById('lightbox')?.addEventListener('touchend', function(e) {
+    if (!startX || !startY) return;
+    
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+    
+    const diffX = startX - endX;
+    const diffY = startY - endY;
+    
+    // Only trigger swipe if horizontal movement is greater than vertical
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+        if (Math.abs(diffX) > 50) { // Minimum swipe distance
+            if (diffX > 0) {
+                nextLightboxImage(); // Swipe left = next image
+            } else {
+                previousLightboxImage(); // Swipe right = previous image
+            }
+        }
+    }
+    
+    startX = null;
+    startY = null;
+});
+
 // Auto-play (optional) - uncomment to enable
 // setInterval(function() {
 //     if (totalImages > 1) {
@@ -337,7 +435,53 @@ function openLightbox(index = null) {
     if (lightbox) {
         lightbox.classList.remove('hidden');
         document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        
+        // Ensure proper aspect ratio after opening
+        setTimeout(() => {
+            ensureProperAspectRatio();
+        }, 100);
     }
+}
+
+// Function to ensure ONLY lightbox images maintain proper aspect ratio
+function ensureProperAspectRatio() {
+    // Only apply to lightbox images, not main carousel
+    const lightboxImages = document.querySelectorAll('#lightbox img');
+    
+    lightboxImages.forEach(img => {
+        if (img.complete && img.naturalWidth > 0) {
+            adjustLightboxImageSize(img);
+        } else {
+            img.addEventListener('load', () => adjustLightboxImageSize(img));
+        }
+    });
+}
+
+function adjustLightboxImageSize(img) {
+    const container = img.closest('.lightbox-slide');
+    if (!container) return;
+    
+    // Only adjust if it's in lightbox
+    if (!container.closest('#lightbox')) return;
+    
+    const maxWidth = window.innerWidth - 160;
+    const maxHeight = window.innerHeight - 200;
+    
+    // Determine which dimension is the limiting factor
+    const widthRatio = maxWidth / img.naturalWidth;
+    const heightRatio = maxHeight / img.naturalHeight;
+    const scale = Math.min(widthRatio, heightRatio, 1); // Don't scale up
+    
+    if (scale < 1) {
+        img.style.width = Math.floor(img.naturalWidth * scale) + 'px';
+        img.style.height = Math.floor(img.naturalHeight * scale) + 'px';
+    } else {
+        img.style.width = img.naturalWidth + 'px';
+        img.style.height = img.naturalHeight + 'px';
+    }
+    
+    img.style.maxWidth = 'none';
+    img.style.maxHeight = 'none';
 }
 
 function closeLightbox() {
@@ -418,6 +562,19 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
+
+// Handle window resize ONLY for lightbox
+window.addEventListener('resize', () => {
+    const lightbox = document.getElementById('lightbox');
+    if (lightbox && !lightbox.classList.contains('hidden')) {
+        setTimeout(() => {
+            ensureProperAspectRatio(); // Only affects lightbox images
+        }, 100);
+    }
+});
+
+// Initialize aspect ratio ONLY for lightbox when it opens
+// Main carousel keeps its original behavior
 </script>
 @endpush
 

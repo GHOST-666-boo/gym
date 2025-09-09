@@ -123,4 +123,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Settings Cache Configuration
+    |--------------------------------------------------------------------------
+    |
+    | This option controls whether the settings cache should be automatically
+    | warmed on application boot. This is recommended for production
+    | environments to improve performance.
+    |
+    */
+
+    'warm_settings_cache' => env('APP_WARM_SETTINGS_CACHE', false),
+
 ];

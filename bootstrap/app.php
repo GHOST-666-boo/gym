@@ -16,6 +16,15 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.errors' => \App\Http\Middleware\HandleAdminErrors::class,
             'cache.response' => \App\Http\Middleware\CacheResponse::class,
             'full.page.cache' => \App\Http\Middleware\FullPageCacheMiddleware::class,
+            'maintenance.mode' => \App\Http\Middleware\MaintenanceModeMiddleware::class,
+            'settings.cache' => \App\Http\Middleware\EnsureSettingsCacheWarmed::class,
+            'image.access.control' => \App\Http\Middleware\ImageAccessControlMiddleware::class,
+        ]);
+        
+        // Apply maintenance mode and settings cache middleware to web routes
+        $middleware->web(append: [
+            \App\Http\Middleware\EnsureSettingsCacheWarmed::class,
+            \App\Http\Middleware\MaintenanceModeMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

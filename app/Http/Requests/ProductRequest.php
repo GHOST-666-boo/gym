@@ -31,13 +31,17 @@ class ProductRequest extends FormRequest
             'track_inventory' => 'boolean',
         ];
 
-        // Different image validation rules for create vs update
+        // Image validation rules - support both single and multiple images
         if ($this->isMethod('post')) {
-            // Creating new product - image is optional but if provided must be valid
+            // Creating new product - images are optional but if provided must be valid
             $rules['image'] = 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240|dimensions:min_width=300,min_height=300';
+            $rules['images'] = 'nullable|array|max:10';
+            $rules['images.*'] = 'image|mimes:jpeg,png,jpg,gif,webp|max:10240|dimensions:min_width=300,min_height=300';
         } else {
-            // Updating existing product - image is optional
+            // Updating existing product - images are optional
             $rules['image'] = 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240|dimensions:min_width=300,min_height=300';
+            $rules['images'] = 'nullable|array|max:10';
+            $rules['images.*'] = 'image|mimes:jpeg,png,jpg,gif,webp|max:10240|dimensions:min_width=300,min_height=300';
         }
 
         return $rules;
@@ -63,6 +67,11 @@ class ProductRequest extends FormRequest
             'image.image' => 'The uploaded file must be an image.',
             'image.mimes' => 'The image must be a JPEG, PNG, JPG, GIF, or WebP file.',
             'image.max' => 'The image size cannot exceed 10MB.',
+            'images.max' => 'You can upload maximum 10 images per product.',
+            'images.*.image' => 'Each uploaded file must be an image.',
+            'images.*.mimes' => 'Each image must be a JPEG, PNG, JPG, GIF, or WebP file.',
+            'images.*.max' => 'Each image size cannot exceed 10MB.',
+            'images.*.dimensions' => 'Each image must be at least 300x300 pixels.',
             'image.dimensions' => 'The image must be at least 300x300 pixels.',
             'stock_quantity.required' => 'The stock quantity is required.',
             'stock_quantity.integer' => 'The stock quantity must be a whole number.',

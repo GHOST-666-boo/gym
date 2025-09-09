@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 class AdminUserSeeder extends Seeder
@@ -14,20 +13,23 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create default admin user if it doesn't exist
-        User::firstOrCreate(
-            ['email' => 'admin@gymachines.com'],
-            [
-                'name' => 'Admin User',
-                'email' => 'admin@gymachines.com',
-                'password' => Hash::make('password'),
+        // Create admin user if it doesn't exist
+        $adminUser = User::where('email', 'admin@gymmachines.com')->first();
+        
+        if (!$adminUser) {
+            User::create([
+                'name' => 'Super Admin',
+                'email' => 'admin@gymmachines.com',
+                'password' => Hash::make('admin123'),
                 'is_admin' => true,
                 'email_verified_at' => now(),
-            ]
-        );
-
-        $this->command->info('Admin user created successfully!');
-        $this->command->info('Email: admin@gymachines.com');
-        $this->command->info('Password: password');
+            ]);
+            
+            $this->command->info('Admin user created successfully!');
+            $this->command->info('Email: admin@gymmachines.com');
+            $this->command->info('Password: admin123');
+        } else {
+            $this->command->info('Admin user already exists!');
+        }
     }
 }

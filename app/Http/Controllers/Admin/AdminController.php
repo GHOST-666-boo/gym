@@ -7,15 +7,18 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\User;
 use App\Services\AnalyticsService;
+use App\Services\WatermarkSettingsService;
 use Illuminate\View\View;
 
 class AdminController extends Controller
 {
     protected AnalyticsService $analyticsService;
+    protected WatermarkSettingsService $watermarkSettingsService;
 
-    public function __construct(AnalyticsService $analyticsService)
+    public function __construct(AnalyticsService $analyticsService, WatermarkSettingsService $watermarkSettingsService)
     {
         $this->analyticsService = $analyticsService;
+        $this->watermarkSettingsService = $watermarkSettingsService;
     }
 
     /**
@@ -45,6 +48,16 @@ class AdminController extends Controller
         $analytics = $this->analyticsService->getDashboardAnalytics('7days');
         $realTimeAnalytics = $this->analyticsService->getRealTimeAnalytics();
 
-        return view('admin.dashboard', compact('stats', 'analytics', 'realTimeAnalytics'));
+        // Get image protection and watermark status
+        $imageProtectionStatus = [
+            'protection_enabled' => $this->watermarkSettingsService->isImageProtectionEnabled(),
+            'watermark_enabled' => $this->watermarkSettingsService->isWatermarkEnabled(),
+            'protection_methods' => $this->watermarkSettingsService->getProtectionConfig(),
+            'watermark_config' => $this->watermarkSettingsService->getWatermarkConfig(),
+            'has_watermark_text' => !empty($this->watermarkSettingsService->getWatermarkText()),
+            'has_watermark_logo' => !empty($this->watermarkSettingsService->getWatermarkLogoPath()),
+        ];
+
+        return view('admin.dashboard', compact('stats', 'analytics', 'realTimeAnalytics', 'imageProtectionStatus'));
     }
 }

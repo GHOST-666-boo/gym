@@ -9,3 +9,10 @@
 /.github export-ignore
 CHANGELOG.md export-ignore
 .styleci.yml export-ignore
+# Exclude tests and dev-only files from release archives
+/tests export-ignore
+/phpunit.xml export-ignore
+/.phpunit.cache export-ignore
+/.phpunit.result.cache export-ignore
+/.gitignore export-ignore
+/.gitattributes export-ignore

@@ -6,23 +6,23 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <!-- SEO Meta Tags -->
-        <title>@yield('title', 'Gym Machines - Professional Fitness Equipment')</title>
-        <meta name="description" content="@yield('description', 'Discover our premium collection of gym machines and fitness equipment. Professional grade equipment for commercial and home gyms.')">
-        <meta name="keywords" content="@yield('keywords', 'gym machines, fitness equipment, commercial gym, home gym, exercise equipment')">
-        <meta name="author" content="Gym Machines">
+        <title>@yield('title', meta_title() ?: site_name() . ' - Professional Fitness Equipment')</title>
+        <meta name="description" content="@yield('description', meta_description() ?: 'Discover our premium collection of gym machines and fitness equipment. Professional grade equipment for commercial and home gyms.')">
+        <meta name="keywords" content="@yield('keywords', meta_keywords() ?: 'gym machines, fitness equipment, commercial gym, home gym, exercise equipment')">
+        <meta name="author" content="{{ site_name() }}">
         
         <!-- Open Graph Meta Tags -->
-        <meta property="og:title" content="@yield('og_title', 'Gym Machines - Professional Fitness Equipment')">
-        <meta property="og:description" content="@yield('og_description', 'Discover our premium collection of gym machines and fitness equipment.')">
+        <meta property="og:title" content="@yield('og_title', meta_title() ?: site_name() . ' - Professional Fitness Equipment')">
+        <meta property="og:description" content="@yield('og_description', meta_description() ?: 'Discover our premium collection of gym machines and fitness equipment.')">
         <meta property="og:type" content="website">
         <meta property="og:url" content="{{ url()->current() }}">
-        <meta property="og:image" content="@yield('og_image', asset('images/gym-machines-logo.jpg'))">
+        <meta property="og:image" content="@yield('og_image', site_logo())">
         
         <!-- Twitter Card Meta Tags -->
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="@yield('twitter_title', 'Gym Machines - Professional Fitness Equipment')">
-        <meta name="twitter:description" content="@yield('twitter_description', 'Discover our premium collection of gym machines and fitness equipment.')">
-        <meta name="twitter:image" content="@yield('twitter_image', asset('images/gym-machines-logo.jpg'))">
+        <meta name="twitter:title" content="@yield('twitter_title', meta_title() ?: site_name() . ' - Professional Fitness Equipment')">
+        <meta name="twitter:description" content="@yield('twitter_description', meta_description() ?: 'Discover our premium collection of gym machines and fitness equipment.')">
+        <meta name="twitter:image" content="@yield('twitter_image', site_logo())"
 
         <!-- Canonical URL -->
         <link rel="canonical" href="{{ url()->current() }}">
@@ -35,10 +35,80 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Favicon -->
-        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+        <link rel="icon" type="image/x-icon" href="{{ site_favicon() }}">
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+        <!-- Jewelry UI Styles -->
+        <link href="{{ asset('css/jewelry-ui.css') }}" rel="stylesheet">
+        
+        <!-- Global CSS Watermark Styles -->
+        @if(app(\App\Services\SettingsService::class)->get('watermark_enabled', false))
+            @php
+                $watermarkSettings = app(\App\Services\WatermarkService::class)->getWatermarkSettings();
+                $watermarkText = $watermarkSettings['text'] ?? '';
+                $watermarkOpacity = ($watermarkSettings['opacity'] ?? 50) / 100;
+                $watermarkColor = $watermarkSettings['color'] ?? '#FFFFFF';
+                $watermarkPosition = $watermarkSettings['position'] ?? 'bottom-right';
+                
+                // Convert position to CSS
+                $positionMap = [
+                    'top-left' => 'top: 10px; left: 10px;',
+                    'top-center' => 'top: 10px; left: 50%; transform: translateX(-50%);',
+                    'top-right' => 'top: 10px; right: 10px;',
+                    'center-left' => 'top: 50%; left: 10px; transform: translateY(-50%);',
+                    'center' => 'top: 50%; left: 50%; transform: translate(-50%, -50%);',
+                    'center-right' => 'top: 50%; right: 10px; transform: translateY(-50%);',
+                    'bottom-left' => 'bottom: 10px; left: 10px;',
+                    'bottom-center' => 'bottom: 10px; left: 50%; transform: translateX(-50%);',
+                    'bottom-right' => 'bottom: 10px; right: 10px;'
+                ];
+                $positionCSS = $positionMap[$watermarkPosition] ?? $positionMap['bottom-right'];
+            @endphp
+            
+            @if(!empty($watermarkText))
+            <style>
+                /* Global CSS Watermark - Fast Performance */
+                .product-image::after,
+                .product-gallery img::after {
+                    content: '{{ addslashes($watermarkText) }}';
+                    position: absolute;
+                    {{ $positionCSS }}
+                    color: {{ $watermarkColor }};
+                    opacity: {{ $watermarkOpacity }};
+                    font-size: 12px;
+                    font-weight: bold;
+                    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+                    pointer-events: none;
+                    z-index: 10;
+                    white-space: nowrap;
+                    font-family: Arial, sans-serif;
+                }
+                
+                /* Ensure parent container is positioned */
+                .product-image {
+                    position: relative;
+                    display: inline-block;
+                }
+                
+                /* Responsive watermark sizing */
+                @media (max-width: 768px) {
+                    .product-image::after,
+                    .product-gallery img::after {
+                        font-size: 10px;
+                    }
+                }
+                
+                @media (max-width: 480px) {
+                    .product-image::after,
+                    .product-gallery img::after {
+                        font-size: 8px;
+                    }
+                }
+            </style>
+            @endif
+        @endif
         
         @stack('styles')
     </head>
@@ -136,32 +206,7 @@
             @include('layouts.footer')
         </div>
 
-        <!-- Comparison Widget -->
-        <div id="comparison-widget" class="fixed bottom-4 right-4 z-50 hidden">
-            <div class="bg-blue-600 text-white rounded-lg shadow-lg p-4 max-w-sm">
-                <div class="flex items-center justify-between mb-2">
-                    <h4 class="font-semibold text-sm">Product Comparison</h4>
-                    <button onclick="closeComparisonWidget()" class="text-blue-200 hover:text-white">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-                <p class="text-xs text-blue-100 mb-3">
-                    <span class="comparison-count">0</span> products selected for comparison
-                </p>
-                <div class="flex gap-2">
-                    <a href="{{ route('products.compare') }}" 
-                       class="flex-1 bg-white text-blue-600 px-3 py-2 rounded text-xs font-medium text-center hover:bg-blue-50 transition-colors duration-200">
-                        Compare Now
-                    </a>
-                    <button onclick="clearComparisonWidget()" 
-                            class="bg-blue-700 text-white px-3 py-2 rounded text-xs font-medium hover:bg-blue-800 transition-colors duration-200">
-                        Clear
-                    </button>
-                </div>
-            </div>
-        </div>
+
         
         @stack('scripts')
         
@@ -217,94 +262,10 @@
                     });
                 }, 5000);
 
-                // Initialize comparison widget
-                initializeComparisonWidget();
+
             });
 
-            // Comparison widget functions
-            function initializeComparisonWidget() {
-                // Check if we're on a page that should show the comparison widget
-                const currentPath = window.location.pathname;
-                if (currentPath === '/compare') {
-                    return; // Don't show widget on comparison page
-                }
 
-                // Get comparison count and update widget
-                fetch('{{ route("products.compare.count") }}')
-                .then(response => response.json())
-                .then(data => {
-                    updateComparisonWidget(data.count);
-                })
-                .catch(error => {
-                    console.error('Error loading comparison count:', error);
-                });
-            }
-
-            function updateComparisonWidget(count) {
-                const widget = document.getElementById('comparison-widget');
-                const countElement = widget.querySelector('.comparison-count');
-                
-                if (countElement) {
-                    countElement.textContent = count;
-                }
-                
-                if (count > 0) {
-                    widget.classList.remove('hidden');
-                } else {
-                    widget.classList.add('hidden');
-                }
-
-                // Update navigation counters
-                const navCounter = document.getElementById('nav-comparison-count');
-                const mobileNavCounter = document.getElementById('mobile-nav-comparison-count');
-                
-                if (navCounter) {
-                    navCounter.textContent = count;
-                    if (count > 0) {
-                        navCounter.classList.remove('hidden');
-                    } else {
-                        navCounter.classList.add('hidden');
-                    }
-                }
-                
-                if (mobileNavCounter) {
-                    mobileNavCounter.textContent = count;
-                    if (count > 0) {
-                        mobileNavCounter.classList.remove('hidden');
-                    } else {
-                        mobileNavCounter.classList.add('hidden');
-                    }
-                }
-            }
-
-            function closeComparisonWidget() {
-                document.getElementById('comparison-widget').classList.add('hidden');
-            }
-
-            function clearComparisonWidget() {
-                if (confirm('Are you sure you want to clear all products from comparison?')) {
-                    fetch('{{ route("products.compare.clear") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            updateComparisonWidget(0);
-                            // Update comparison buttons if they exist
-                            if (typeof updateComparisonButtons === 'function') {
-                                updateComparisonButtons();
-                            }
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-                }
-            }
         </script>
     </body>
 </html>

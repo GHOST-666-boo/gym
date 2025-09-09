@@ -26,5 +26,20 @@ class ViewComposerServiceProvider extends ServiceProvider
             $categories = Category::orderBy('name')->get();
             $view->with('categories', $categories);
         });
+
+        // Share settings with all views
+        View::composer('*', function ($view) {
+            // Make settings helper functions available globally
+            // This ensures settings are cached and available throughout the application
+            $view->with([
+                'siteName' => site_name(),
+                'siteTagline' => site_tagline(),
+                'siteLogo' => site_logo(),
+                'siteFavicon' => site_favicon(),
+                'contactInfo' => contact_info(),
+                'socialMedia' => active_social_media(),
+                'seoSettings' => seo_settings(),
+            ]);
+        });
     }
 }

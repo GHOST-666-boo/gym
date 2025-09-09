@@ -1,8 +1,8 @@
 <header class="bg-white shadow-sm border-b border-gray-200">
-    <div class="flex justify-between items-center px-6 py-4">
+    <div class="flex justify-between items-center px-4 lg:px-6 py-4">
         <!-- Page Title -->
-        <div>
-            <h1 class="text-2xl font-semibold text-gray-900">
+        <div class="min-w-0 flex-1">
+            <h1 class="text-xl lg:text-2xl font-semibold text-gray-900 truncate">
                 @yield('page-title', 'Admin Dashboard')
             </h1>
             @if(View::hasSection('breadcrumbs'))
@@ -15,9 +15,9 @@
         </div>
 
         <!-- Top Navigation Actions -->
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2 lg:space-x-4 ml-4">
             <!-- Quick Actions -->
-            <div class="hidden md:flex items-center space-x-2">
+            <div class="hidden lg:flex items-center space-x-2">
                 <a href="{{ route('admin.products.create') }}" 
                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                     <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -34,6 +34,17 @@
                     View Site
                 </a>
             </div>
+            
+            <!-- Mobile Quick Actions -->
+            <div class="lg:hidden">
+                <a href="{{ route('admin.products.create') }}" 
+                   class="inline-flex items-center p-2 border border-transparent rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                   title="Add Product">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                </a>
+            </div>
 
             <!-- User Dropdown -->
             <div class="relative" x-data="{ open: false }">
@@ -44,8 +55,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                         </svg>
                     </div>
-                    <span class="ml-2 text-gray-700 font-medium">{{ Auth::user()->name }}</span>
-                    <svg class="ml-1 h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span class="ml-2 text-gray-700 font-medium hidden sm:inline-block truncate max-w-32">{{ Auth::user()->name }}</span>
+                    <svg class="ml-1 h-4 w-4 text-gray-500 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
@@ -66,7 +77,7 @@
                         <div class="text-xs text-gray-500">{{ Auth::user()->email }}</div>
                     </div>
 
-                    <a href="{{ route('profile.edit') }}" 
+                    <a href="{{ route('admin.profile.edit') }}" 
                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
                         <svg class="inline h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
