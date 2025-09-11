@@ -1,0 +1,18 @@
+* text=auto eol=lf
+
+*.blade.php diff=html
+*.css diff=css
+*.html diff=html
+*.md diff=markdown
+*.php diff=php
+
+/.github export-ignore
+CHANGELOG.md export-ignore
+.styleci.yml export-ignore
+# Exclude tests and dev-only files from release archives
+/tests export-ignore
+/phpunit.xml export-ignore
+/.phpunit.cache export-ignore
+/.phpunit.result.cache export-ignore
+/.gitignore export-ignore
+/.gitattributes export-ignore

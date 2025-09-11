@@ -1,0 +1,5 @@
+@props(['title' => null,
+    'content' => null
+])
+
+<div class="card"><h3>{{ $title }}</h3><p>{{ $content }}</p></div>
