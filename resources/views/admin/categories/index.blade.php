@@ -23,25 +23,25 @@
         @if($categories->count() > 0)
             <!-- Categories Table -->
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="categories-table min-w-full divide-y divide-gray-200 tabl
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="w-1/4 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Category
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Slug
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="w-20 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Products
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="w-1/3 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Description
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="w-24 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Created
                             </th>
-                            <th scope="col" class="relative px-6 py-3">
+                            <th scope="col" class="w-20 relative px-6 py-3">
                                 <span class="sr-only">Actions</span>
                             </th>
                         </tr>
@@ -76,17 +76,17 @@
                                             @if($category->products_count > 0) bg-green-100 text-green-800 @else bg-gray-100 text-gray-800 @endif">
                                             {{ $category->products_count }} {{ Str::plural('product', $category->products_count) }}
                                         </span>
-                                        @if($category->products_count > 0)
+                                        <!-- @if($category->products_count > 0)
                                             <a href="{{ route('admin.categories.show', $category) }}" 
                                                class="ml-2 text-blue-600 hover:text-blue-800 text-xs">
                                                 View
                                             </a>
-                                        @endif
+                                        @endif -->
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900 max-w-xs truncate">
-                                        {{ $category->description ?: 'No description' }}
+                                    <div class="text-sm text-gray-900 max-w-48 truncate" title="{{ $category->description }}">
+                                        {{ Str::limit($category->description ?: 'No description', 50) }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

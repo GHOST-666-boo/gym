@@ -29,6 +29,9 @@ class ProductRequest extends FormRequest
             'stock_quantity' => 'required|integer|min:0|max:999999',
             'low_stock_threshold' => 'required|integer|min:0|max:999999',
             'track_inventory' => 'boolean',
+            'dimensions' => 'nullable|string|max:255',
+            'material' => 'nullable|string|max:255',
+            'care_instructions' => 'nullable|string|max:2000',
         ];
 
         // Image validation rules - support both single and multiple images
@@ -81,6 +84,9 @@ class ProductRequest extends FormRequest
             'low_stock_threshold.integer' => 'The low stock threshold must be a whole number.',
             'low_stock_threshold.min' => 'The low stock threshold cannot be negative.',
             'low_stock_threshold.max' => 'The low stock threshold cannot exceed 999,999.',
+            'dimensions.max' => 'The dimensions cannot exceed 255 characters.',
+            'material.max' => 'The material cannot exceed 255 characters.',
+            'care_instructions.max' => 'The care instructions cannot exceed 2,000 characters.',
         ];
     }
 
@@ -99,6 +105,9 @@ class ProductRequest extends FormRequest
             'stock_quantity' => 'stock quantity',
             'low_stock_threshold' => 'low stock threshold',
             'track_inventory' => 'inventory tracking',
+            'dimensions' => 'dimensions',
+            'material' => 'material',
+            'care_instructions' => 'care instructions',
         ];
     }
 

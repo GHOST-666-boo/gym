@@ -109,6 +109,26 @@
                 </div>
             </div>
 
+            <!-- Quotes -->
+            <div class="relative group mb-2">
+                <a href="{{ route('admin.quotes.index') }}" 
+                   :class="collapsed ? 'justify-center px-2' : 'px-3'"
+                   class="@if(request()->routeIs('admin.quotes.*')) bg-blue-600 text-white @else text-gray-300 hover:bg-gray-800 hover:text-white @endif flex items-center py-2 text-sm font-medium rounded-md transition-colors duration-200">
+                    <svg class="@if(request()->routeIs('admin.quotes.*')) text-white @else text-gray-400 group-hover:text-white @endif h-5 w-5 flex-shrink-0" 
+                         :class="collapsed ? 'mr-0' : 'mr-3'" 
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                    <span x-show="!collapsed" class="transition-opacity duration-200">Quotes</span>
+                </a>
+                
+                <!-- Tooltip -->
+                <div x-show="collapsed" 
+                     class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                    Quotes
+                </div>
+            </div>
+
             <!-- Reviews -->
             <div class="relative group mb-2">
                 <a href="{{ route('admin.reviews.index') }}" 
@@ -117,7 +137,7 @@
                     <svg class="@if(request()->routeIs('admin.reviews.*')) text-white @else text-gray-400 group-hover:text-white @endif h-5 w-5 flex-shrink-0" 
                          :class="collapsed ? 'mr-0' : 'mr-3'" 
                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
                     </svg>
                     <span x-show="!collapsed" class="transition-opacity duration-200">Reviews</span>
                 </a>

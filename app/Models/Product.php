@@ -27,6 +27,9 @@ class Product extends Model
         'stock_quantity',
         'low_stock_threshold',
         'track_inventory',
+        'dimensions',
+        'material',
+        'care_instructions',
     ];
 
     /**
@@ -160,11 +163,11 @@ class Product extends Model
 
         return $query->where(function ($q) use ($searchTerm) {
             $q->where('name', 'LIKE', "%{$searchTerm}%")
-              ->orWhere('short_description', 'LIKE', "%{$searchTerm}%")
-              ->orWhere('long_description', 'LIKE', "%{$searchTerm}%")
-              ->orWhereHas('category', function ($categoryQuery) use ($searchTerm) {
-                  $categoryQuery->where('name', 'LIKE', "%{$searchTerm}%");
-              });
+                ->orWhere('short_description', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('long_description', 'LIKE', "%{$searchTerm}%")
+                ->orWhereHas('category', function ($categoryQuery) use ($searchTerm) {
+                    $categoryQuery->where('name', 'LIKE', "%{$searchTerm}%");
+                });
         });
     }
 
@@ -260,7 +263,7 @@ class Product extends Model
         if (!$this->track_inventory) {
             return true;
         }
-        
+
         return $this->stock_quantity > 0;
     }
 
@@ -272,7 +275,7 @@ class Product extends Model
         if (!$this->track_inventory) {
             return false;
         }
-        
+
         return $this->stock_quantity <= $this->low_stock_threshold && $this->stock_quantity > 0;
     }
 
@@ -284,7 +287,7 @@ class Product extends Model
         if (!$this->track_inventory) {
             return false;
         }
-        
+
         return $this->stock_quantity <= 0;
     }
 
@@ -296,15 +299,15 @@ class Product extends Model
         if (!$this->track_inventory) {
             return 'Available';
         }
-        
+
         if ($this->isOutOfStock()) {
             return 'Out of Stock';
         }
-        
+
         if ($this->isLowStock()) {
             return 'Low Stock';
         }
-        
+
         return 'In Stock';
     }
 
@@ -316,15 +319,15 @@ class Product extends Model
         if (!$this->track_inventory) {
             return 'text-green-600';
         }
-        
+
         if ($this->isOutOfStock()) {
             return 'text-red-600';
         }
-        
+
         if ($this->isLowStock()) {
             return 'text-yellow-600';
         }
-        
+
         return 'text-green-600';
     }
 
@@ -335,7 +338,7 @@ class Product extends Model
     {
         return $query->where(function ($q) {
             $q->where('track_inventory', false)
-              ->orWhere('stock_quantity', '>', 0);
+                ->orWhere('stock_quantity', '>', 0);
         });
     }
 
@@ -345,8 +348,8 @@ class Product extends Model
     public function scopeLowStock($query)
     {
         return $query->where('track_inventory', true)
-                    ->whereColumn('stock_quantity', '<=', 'low_stock_threshold')
-                    ->where('stock_quantity', '>', 0);
+            ->whereColumn('stock_quantity', '<=', 'low_stock_threshold')
+            ->where('stock_quantity', '>', 0);
     }
 
     /**
@@ -355,7 +358,7 @@ class Product extends Model
     public function scopeOutOfStock($query)
     {
         return $query->where('track_inventory', true)
-                    ->where('stock_quantity', '<=', 0);
+            ->where('stock_quantity', '<=', 0);
     }
 
     /**
@@ -367,12 +370,12 @@ class Product extends Model
         if ($this->primaryImage) {
             return $this->primaryImage->url;
         }
-        
+
         // Fallback to legacy image_path
         if ($this->image_path) {
             return asset('storage/' . $this->image_path);
         }
-        
+
         return null;
     }
 
@@ -382,17 +385,17 @@ class Product extends Model
     public function getAllImageUrlsAttribute(): array
     {
         $urls = [];
-        
+
         // Add images from new relationship
         foreach ($this->images as $image) {
             $urls[] = $image->url;
         }
-        
+
         // Add legacy image if it exists and not already in new images
         if ($this->image_path && empty($urls)) {
             $urls[] = asset('storage/' . $this->image_path);
         }
-        
+
         return $urls;
     }
 

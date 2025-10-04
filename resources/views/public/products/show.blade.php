@@ -4,14 +4,9 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-4">{{ $product->name }}</h1>
-    
-    @if($product->category)
-        <p class="text-gray-600 mb-4">Category: {{ $product->category->name }}</p>
-    @endif
-    
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- Left Side - Product Images -->
+        <div class="space-y-4">
             @php 
                 $images = $product->images && $product->images->count() ? $product->images : collect();
                 $allImages = [];
@@ -39,7 +34,7 @@
                     <!-- Main Image Container -->
                     <div class="relative w-full bg-gray-100 rounded-lg overflow-hidden cursor-pointer product-gallery shadow-md" id="imageCarousel" onclick="openLightbox(currentImageIndex)" style="min-height: 300px;">
                         @foreach($allImages as $index => $image)
-                            <div class="carousel-slide {{ $index === 0 ? 'active' : '' }} absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-in-out {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}" style="padding: 20px;">
+                            <div class="carousel-slide {{ $index === 0 ? 'active' : '' }} absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-in-out {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}">
                                 @php
                                     // Extract image path from URL for watermarking
                                     $imagePath = str_replace(asset('storage/'), '', $image['url']);
@@ -51,7 +46,7 @@
                                     :width="800"
                                     :height="600"
                                     :lazy="false"
-                                    style="max-height: calc(100vh - 200px);"
+                                    
                                 />
                             </div>
                         @endforeach
@@ -141,15 +136,114 @@
             @endif
         </div>
         
-        <div>
-            <p class="text-xl text-gray-600 mb-6">{{ $product->short_description }}</p>
-            <p class="text-3xl font-bold text-blue-600 mb-6">${{ number_format($product->price, 2) }}</p>
-            
-            <div class="space-y-4">
-                <a href="{{ route('contact') }}" 
-                   class="block w-full bg-blue-600 text-white text-center px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
-                    Get Quote
-                </a>
+        <!-- Right Side - Product Information -->
+        <div class="space-y-6">
+            <!-- Product Title -->
+            <div>
+                <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{{ $product->name }}</h1>
+                
+                <!-- Category -->
+                @if($product->category)
+                    <div class="mb-4">
+                        <a href="{{ route('products.category', $product->category) }}" 
+                           class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors duration-200">
+                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                            {{ $product->category->name }}
+                        </a>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Short Description -->
+            <div>
+                <p class="text-lg text-gray-600 leading-relaxed">{{ $product->short_description }}</p>
+            </div>
+
+            <!-- Price -->
+            <div class="border-t border-b border-gray-200 py-6">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-500 uppercase tracking-wider">Price</span>
+                    <span class="text-3xl font-bold text-blue-600">${{ number_format($product->price, 2) }}</span>
+                </div>
+            </div>
+
+            <!-- Stock Status -->
+            @if($product->track_inventory)
+                <div class="flex items-center space-x-2">
+                    <div class="flex items-center">
+                        @if($product->isInStock())
+                            <div class="h-3 w-3 bg-green-500 rounded-full mr-2"></div>
+                            <span class="text-sm font-medium text-green-700">In Stock</span>
+                            @if($product->isLowStock())
+                                <span class="ml-2 text-xs text-yellow-600">({{ $product->stock_quantity }} remaining)</span>
+                            @endif
+                        @else
+                            <div class="h-3 w-3 bg-red-500 rounded-full mr-2"></div>
+                            <span class="text-sm font-medium text-red-700">Out of Stock</span>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
+            <!-- Action Buttons -->
+            <div class="space-y-4 pt-4">
+                <!-- Add to Quote Cart Button -->
+                <button onclick="addToQuoteCart({{ $product->id }})" 
+                        class="block w-full bg-green-600 text-white text-center px-8 py-4 rounded-lg font-semibold text-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl">
+                    <svg class="h-5 w-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5-6m0 0h15M17 21a2 2 0 100-4 2 2 0 000 4zM9 21a2 2 0 100-4 2 2 0 000 4z"></path>
+                    </svg>
+                    Add to Quote Cart
+                </button>
+                
+                <!-- Get Instant Quote Button -->
+                <button onclick="openQuoteModal()" 
+                        class="block w-full bg-blue-600 text-white text-center px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl">
+                    <svg class="h-5 w-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                    Get Instant Quote
+                </button>
+                
+                <!-- Additional Info -->
+                <div class="text-center">
+                    <p class="text-sm text-gray-500">
+                        Add multiple products to cart for bulk quotes or get instant quote for this product
+                    </p>
+                </div>
+            </div>
+
+            <!-- Quick Features -->
+            <div class="bg-gray-50 rounded-lg p-4">
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">Why Choose This Product?</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="flex items-center text-sm text-gray-600">
+                        <svg class="h-4 w-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        Professional Grade
+                    </div>
+                    <div class="flex items-center text-sm text-gray-600">
+                        <svg class="h-4 w-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        Expert Support
+                    </div>
+                    <div class="flex items-center text-sm text-gray-600">
+                        <svg class="h-4 w-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        Fast Delivery
+                    </div>
+                    <div class="flex items-center text-sm text-gray-600">
+                        <svg class="h-4 w-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        Quality Guarantee
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -239,11 +333,12 @@
     </div>
     @endif
     
+    <!-- Quote Modal Component -->
+    <x-quote-modal :product="$product" />
+    
+    <!-- Product Details Section -->
     <div class="mt-12">
-        <h2 class="text-2xl font-bold mb-6">Product Details</h2>
-        <div class="prose max-w-none">
-            {!! nl2br(e($product->long_description)) !!}
-        </div>
+        <x-product-details :product="$product" />
     </div>
 </div>
 
@@ -266,7 +361,6 @@
     width: auto;
     height: auto;
     max-width: 100%;
-    max-height: calc(100% - 40px);
     object-fit: contain;
 }
 </style>

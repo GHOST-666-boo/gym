@@ -414,3 +414,101 @@
         @apply absolute -top-10 left-6 bg-blue-600 text-white px-4 py-2 rounded-md z-50 focus:top-6 transition-all duration-200;
     }
 }
+/* Categories Table Optimization */
+.categories-table {
+    table-layout: fixed;
+}
+
+.categories-table th:nth-child(1) { width: 25%; } /* Category */
+.categories-table th:nth-child(2) { width: 15%; } /* Slug */
+.categories-table th:nth-child(3) { width: 12%; } /* Products */
+.categories-table th:nth-child(4) { width: 30%; } /* Description */
+.categories-table th:nth-child(5) { width: 12%; } /* Created */
+.categories-table th:nth-child(6) { width: 6%; }  /* Actions */
+
+.categories-table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .categories-table th:nth-child(2),
+    .categories-table td:nth-child(2) {
+        display: none; /* Hide slug on mobile */
+    }
+    
+    .categories-table th:nth-child(5),
+    .categories-table td:nth-child(5) {
+        display: none; /* Hide created date on mobile */
+    }
+    
+    .categories-table th:nth-child(1) { width: 35%; }
+    .categories-table th:nth-child(3) { width: 20%; }
+    .categories-table th:nth-child(4) { width: 35%; }
+    .categories-table th:nth-child(6) { width: 10%; }
+}/* N
+ewsletter Admin Responsive Fixes */
+.newsletter-filters {
+    overflow-x: hidden;
+}
+
+.newsletter-filters form {
+    min-width: 0;
+}
+
+.newsletter-filters .grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+@media (max-width: 1024px) {
+    .newsletter-filters .lg\:col-span-4 {
+        grid-column: span 12;
+    }
+    
+    .newsletter-filters .lg\:col-span-3 {
+        grid-column: span 6;
+    }
+    
+    .newsletter-filters .lg\:col-span-2 {
+        grid-column: span 12;
+    }
+}
+
+@media (max-width: 640px) {
+    .newsletter-filters .lg\:col-span-3 {
+        grid-column: span 12;
+    }
+    
+    .newsletter-filters .flex-col.sm\:flex-row {
+        flex-direction: column;
+    }
+    
+    .newsletter-filters button,
+    .newsletter-filters a {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Newsletter Table Responsive */
+.newsletter-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.newsletter-table {
+    min-width: 800px;
+}
+
+@media (max-width: 768px) {
+    .newsletter-table th:nth-child(3),
+    .newsletter-table td:nth-child(3) {
+        display: none; /* Hide Name column on mobile */
+    }
+    
+    .newsletter-table th:nth-child(6),
+    .newsletter-table td:nth-child(6) {
+        display: none; /* Hide Unsubscribed column on mobile */
+    }
+}

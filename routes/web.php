@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\QuoteCartController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\AdminController;
@@ -28,6 +29,17 @@ Route::post('/contact', [ContactController::class, 'store'])->name('contact.stor
 Route::post('/newsletter/subscribe', [App\Http\Controllers\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 Route::get('/newsletter/unsubscribe/{token}', [App\Http\Controllers\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 Route::get('/newsletter/preferences/{token}', [App\Http\Controllers\NewsletterController::class, 'preferences'])->name('newsletter.preferences');
+
+// Quote Cart routes
+Route::prefix('quote-cart')->name('quote-cart.')->group(function () {
+    Route::get('/', [QuoteCartController::class, 'index'])->name('index');
+    Route::post('/add', [QuoteCartController::class, 'add'])->name('add');
+    Route::delete('/remove', [QuoteCartController::class, 'remove'])->name('remove');
+    Route::patch('/update-quantity', [QuoteCartController::class, 'updateQuantity'])->name('update-quantity');
+    Route::delete('/clear', [QuoteCartController::class, 'clear'])->name('clear');
+    Route::get('/count', [QuoteCartController::class, 'count'])->name('count');
+    Route::post('/submit-quote', [QuoteCartController::class, 'submitQuote'])->name('submit-quote');
+});
 
 // Review routes
 Route::post('/products/{product:slug}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
@@ -107,6 +119,11 @@ Route::middleware(['auth', 'admin', 'admin.errors'])->prefix('admin')->name('adm
     Route::resource('newsletter', App\Http\Controllers\Admin\NewsletterController::class);
     Route::post('newsletter/bulk-action', [App\Http\Controllers\Admin\NewsletterController::class, 'bulkAction'])->name('newsletter.bulk-action');
     Route::get('newsletter-export', [App\Http\Controllers\Admin\NewsletterController::class, 'export'])->name('newsletter.export');
+    
+    // Quote management routes
+    Route::resource('quotes', App\Http\Controllers\Admin\QuoteController::class)->only(['index', 'show', 'update', 'destroy']);
+    Route::patch('quotes/{quote}/status', [App\Http\Controllers\Admin\QuoteController::class, 'updateStatus'])->name('quotes.update-status');
+    Route::post('quotes/bulk-action', [App\Http\Controllers\Admin\QuoteController::class, 'bulkAction'])->name('quotes.bulk-action');
     
     // Analytics routes
     Route::get('analytics', [App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('analytics.index');

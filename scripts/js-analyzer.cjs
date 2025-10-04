@@ -99,8 +99,6 @@ function analyzeJavaScript(filePath) {
             
             VariableDeclarator(path) {
                 const node = path.node;
-                
-                // Handle simple variable declarations
                 if (node.id.name) {
                     analysis.variables.push({
                         name: node.id.name,
@@ -108,45 +106,6 @@ function analyzeJavaScript(filePath) {
                         value: node.init ? code.substring(node.init.start, node.init.end) : ''
                     });
                 }
-                
-                // Handle array destructuring [count, setCount] = useState(0)
-                if (node.id.type === 'ArrayPattern') {
-                    node.id.elements.forEach(element => {
-                        if (element && element.name) {
-                            analysis.variables.push({
-                                name: element.name,
-                                line: node.loc?.start.line || 0,
-                                value: node.init ? code.substring(node.init.start, node.init.end) : ''
-                            });
-                        }
-                    });
-                }
-                
-                // Handle object destructuring {prop1, prop2} = object
-                if (node.id.type === 'ObjectPattern') {
-                    node.id.properties.forEach(prop => {
-                        if (prop.value && prop.value.name) {
-                            analysis.variables.push({
-                                name: prop.value.name,
-                                line: node.loc?.start.line || 0,
-                                value: node.init ? code.substring(node.init.start, node.init.end) : ''
-                            });
-                        }
-                    });
-                }
-            },
-            
-            // Handle class methods
-            ClassMethod(path) {
-                const method = path.node;
-                analysis.functions.push({
-                    name: method.key.name || 'anonymous',
-                    params: method.params.map(param => ({
-                        name: param.name || param.left?.name || 'unknown'
-                    })),
-                    line: method.loc?.start.line || 0,
-                    body: code.substring(method.start, method.end)
-                });
             },
             
             ExportDefaultDeclaration(path) {

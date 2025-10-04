@@ -2,182 +2,124 @@
 
 @section('title', 'Edit Newsletter Subscriber')
 
-@section('content')
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+@section('header')
+    <div class="flex justify-between items-center">
         <div>
-            <h1 class="h3 mb-0 text-gray-800">Edit Newsletter Subscriber</h1>
-            <p class="text-muted">Update subscriber information</p>
+            <h1 class="text-2xl font-bold text-gray-900">Edit Newsletter Subscriber</h1>
+            <p class="text-gray-600 mt-1">Update subscriber information</p>
         </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('admin.newsletter.show', ['newsletter' => $subscriber]) }}" class="btn btn-info btn-sm">
-                <i class="fas fa-eye"></i> View Details
+        <div class="flex items-center space-x-3">
+            <a href="{{ route('admin.newsletter.show', ['newsletter' => $subscriber]) }}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
+                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                View Details
             </a>
-            <a href="{{ route('admin.newsletter.index') }}" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left"></i> Back to List
+            <a href="{{ route('admin.newsletter.index') }}" 
+               class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
+                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to List
             </a>
         </div>
     </div>
+@endsection
 
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Subscriber Information</h6>
+@section('content')
+    <div class="p-6">
+        <div class="max-w-2xl">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Subscriber Information</h3>
                 </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ route('admin.newsletter.update', ['newsletter' => $subscriber]) }}">
+                <div class="p-6">
+                    <form method="POST" action="{{ route('admin.newsletter.update', ['newsletter' => $subscriber]) }}" class="space-y-6">
                         @csrf
                         @method('PUT')
                         
-                        <div class="form-group">
-                            <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                Email Address <span class="text-red-500">*</span>
+                            </label>
                             <input type="email" 
-                                   class="form-control @error('email') is-invalid @enderror" 
                                    id="email" 
                                    name="email" 
-                                   value="{{ old('email', $subscriber->email) }}" 
+                                   value="{{ old('email', $subscriber->email) }}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('email') border-red-500 @enderror"
+                                   placeholder="Enter email address"
                                    required>
                             @error('email')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
-                            <small class="form-text text-muted">
-                                The subscriber's email address. Must be unique.
-                            </small>
                         </div>
 
-                        <div class="form-group">
-                            <label for="name" class="form-label">Name</label>
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                                Name (Optional)
+                            </label>
                             <input type="text" 
-                                   class="form-control @error('name') is-invalid @enderror" 
                                    id="name" 
                                    name="name" 
-                                   value="{{ old('name', $subscriber->name) }}">
+                                   value="{{ old('name', $subscriber->name) }}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('name') border-red-500 @enderror"
+                                   placeholder="Enter subscriber name">
                             @error('name')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
-                            <small class="form-text text-muted">
-                                Optional. The subscriber's name for personalization.
-                            </small>
                         </div>
 
-                        <div class="form-group">
-                            <label class="form-label">Subscription Status</label>
-                            <div class="form-check">
-                                <input class="form-check-input @error('is_active') is-invalid @enderror" 
-                                       type="checkbox" 
-                                       id="is_active" 
+                        <div>
+                            <label class="flex items-center">
+                                <input type="checkbox" 
                                        name="is_active" 
-                                       value="1"
-                                       {{ old('is_active', $subscriber->is_active) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="is_active">
-                                    Active subscription
-                                </label>
-                            </div>
-                            @error('is_active')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                            <small class="form-text text-muted">
-                                Uncheck to deactivate the subscription. The subscriber will not receive future newsletters.
-                            </small>
+                                       value="1" 
+                                       {{ old('is_active', $subscriber->is_active) ? 'checked' : '' }}
+                                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm text-gray-700">Active subscription</span>
+                            </label>
+                            <p class="mt-1 text-xs text-gray-500">Uncheck to deactivate subscription</p>
                         </div>
 
-                        <div class="form-group">
-                            <div class="d-flex justify-content-between">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Update Subscriber
-                                </button>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h4 class="text-sm font-medium text-gray-900 mb-2">Subscription Details</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
                                 <div>
-                                    <a href="{{ route('admin.newsletter.show', ['newsletter' => $subscriber]) }}" class="btn btn-outline-secondary me-2">
-                                        Cancel
-                                    </a>
-                                    <form method="POST" 
-                                          action="{{ route('admin.newsletter.destroy', ['newsletter' => $subscriber]) }}" 
-                                          class="d-inline"
-                                          onsubmit="return confirm('Are you sure you want to delete this subscriber? This action cannot be undone.')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">
-                                            <i class="fas fa-trash"></i> Delete
-                                        </button>
-                                    </form>
+                                    <span class="font-medium">Subscribed:</span>
+                                    {{ $subscriber->subscribed_at->format('M j, Y g:i A') }}
+                                </div>
+                                @if($subscriber->unsubscribed_at)
+                                    <div>
+                                        <span class="font-medium">Unsubscribed:</span>
+                                        {{ $subscriber->unsubscribed_at->format('M j, Y g:i A') }}
+                                    </div>
+                                @endif
+                                <div>
+                                    <span class="font-medium">Last Updated:</span>
+                                    {{ $subscriber->updated_at->format('M j, Y g:i A') }}
+                                </div>
+                                <div>
+                                    <span class="font-medium">Subscriber ID:</span>
+                                    #{{ $subscriber->id }}
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                            <a href="{{ route('admin.newsletter.index') }}" 
+                               class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Cancel
+                            </a>
+                            <button type="submit" 
+                                    class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Update Subscriber
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-4">
-            <!-- Subscriber Summary -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-info">Current Information</h6>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <strong>Current Status:</strong>
-                        @if($subscriber->is_active)
-                            <span class="badge badge-success ml-2">Active</span>
-                        @else
-                            <span class="badge badge-secondary ml-2">Inactive</span>
-                        @endif
-                    </div>
-                    
-                    <div class="mb-3">
-                        <strong>Subscribed:</strong>
-                        <br>
-                        <small class="text-muted">
-                            {{ $subscriber->subscribed_at->format('F j, Y \a\t g:i A') }}
-                            <br>
-                            ({{ $subscriber->subscribed_at->diffForHumans() }})
-                        </small>
-                    </div>
-
-                    @if($subscriber->unsubscribed_at)
-                        <div class="mb-3">
-                            <strong>Unsubscribed:</strong>
-                            <br>
-                            <small class="text-muted">
-                                {{ $subscriber->unsubscribed_at->format('F j, Y \a\t g:i A') }}
-                                <br>
-                                ({{ $subscriber->unsubscribed_at->diffForHumans() }})
-                            </small>
-                        </div>
-                    @endif
-
-                    <div class="mb-3">
-                        <strong>Last Updated:</strong>
-                        <br>
-                        <small class="text-muted">
-                            {{ $subscriber->updated_at->format('F j, Y \a\t g:i A') }}
-                            <br>
-                            ({{ $subscriber->updated_at->diffForHumans() }})
-                        </small>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Important Notes -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-warning">Important Notes</h6>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <strong>Email Changes:</strong> Changing the email address will affect the subscriber's ability to unsubscribe using their existing unsubscribe link.
-                    </div>
-                    
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Status Changes:</strong> Deactivating a subscription will prevent the subscriber from receiving future newsletters, but they can still resubscribe through the website.
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
-</div>
 @endsection
