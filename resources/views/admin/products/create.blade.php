@@ -244,7 +244,68 @@
                     </div>
                 </div>
 
-                <!-- Image Upload Section (removed legacy single upload) -->
+                <!-- Image Gallery Management Section -->
+                <div class="lg:col-span-1">
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-medium text-gray-900">Product Images</h3>
+                            <span class="text-sm text-gray-500" id="image-count">0 images</span>
+                        </div>
+                        
+                        <!-- Image Gallery (empty for new product) -->
+                        <div id="image-gallery" class="space-y-4 mb-6">
+                            <div class="text-center py-8 text-gray-500">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="mt-2 text-sm">No images uploaded yet</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Upload New Images -->
+                        <div class="border-t border-gray-200 pt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Add Images
+                            </label>
+                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
+                                <div class="space-y-1 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <div class="flex text-sm text-gray-600">
+                                        <label for="gallery-images" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                            <span>Upload images</span>
+                                        </label>
+                                        <p class="pl-1">or drag and drop</p>
+                                    </div>
+                                    <p class="text-xs text-gray-500">PNG, JPG, GIF, WebP up to 10MB each (max 10 images)</p>
+                                </div>
+                            </div>
+                            <input id="gallery-images" 
+                                   name="gallery_images[]" 
+                                   type="file" 
+                                   accept="image/*"
+                                   multiple
+                                   class="sr-only">
+                            @error('gallery_images')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                            @error('gallery_images.*')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mt-6">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Image Guidelines</h4>
+                            <ul class="text-xs text-gray-500 space-y-1">
+                                <li>• File formats: JPG, PNG, GIF</li>
+                                <li>• Maximum file size: 10MB per image</li>
+                                <li>• Drag images to reorder them</li>
+                                <li>• First image is used as primary by default</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Form Actions -->
@@ -292,30 +353,73 @@
     shortDescTextarea.addEventListener('input', updateShortDescCounter);
     updateShortDescCounter(); // Initialize counter
 
-    // Image preview functionality
-    const imageInput = document.getElementById('image');
-    const imagePreview = document.getElementById('image-preview');
-    const previewImg = document.getElementById('preview-img');
-    const uploadPlaceholder = document.getElementById('upload-placeholder');
+    // Simple image upload functionality
+    const galleryInput = document.getElementById('gallery-images');
+    const imageGallery = document.getElementById('image-gallery');
+    const imageCount = document.getElementById('image-count');
 
-    imageInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImg.src = e.target.result;
-                imagePreview.classList.remove('hidden');
-                uploadPlaceholder.classList.add('hidden');
-            };
-            reader.readAsDataURL(file);
-        } else {
-            imagePreview.classList.add('hidden');
-            uploadPlaceholder.classList.remove('hidden');
+    // Handle file selection
+    galleryInput.addEventListener('change', function(e) {
+        const files = e.target.files;
+        if (files.length > 0) {
+            updateImagePreview(files);
         }
     });
 
+    function updateImagePreview(files) {
+        // Clear the "no images" message
+        const noImagesMessage = imageGallery.querySelector('.text-center.py-8');
+        if (noImagesMessage) {
+            noImagesMessage.remove();
+        }
+
+        // Clear existing previews
+        imageGallery.innerHTML = '';
+
+        // Create previews for each file
+        Array.from(files).forEach((file, index) => {
+            if (index >= 10) return; // Max 10 images
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageItem = document.createElement('div');
+                imageItem.className = 'image-item bg-white rounded-lg border border-gray-200 p-3';
+                
+                imageItem.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0 relative">
+                            <img src="${e.target.result}" alt="${file.name}" class="w-16 h-16 object-cover rounded-md">
+                            ${index === 0 ? `
+                                <div class="absolute -top-1 -right-1">
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        Primary
+                                    </span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <input type="text" 
+                                   class="image-alt-text w-full text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
+                                   value="${file.name.replace(/\.[^/.]+$/, '')}" 
+                                   placeholder="Alt text for accessibility">
+                            <div class="mt-2 text-xs text-gray-500">
+                                ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                imageGallery.appendChild(imageItem);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Update count
+        imageCount.textContent = `${Math.min(files.length, 10)} images`;
+    }
+
     // Drag and drop functionality
-    const dropZone = document.querySelector('.border-dashed');
+    const dropZone = galleryInput.closest('.border-dashed');
     
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropZone.addEventListener(eventName, preventDefaults, false);
@@ -349,9 +453,16 @@
         const files = dt.files;
         
         if (files.length > 0) {
-            imageInput.files = files;
-            const event = new Event('change', { bubbles: true });
-            imageInput.dispatchEvent(event);
+            // Filter only image files
+            const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+            if (imageFiles.length > 0) {
+                // Create a new FileList-like object
+                const dataTransfer = new DataTransfer();
+                imageFiles.forEach(file => dataTransfer.items.add(file));
+                galleryInput.files = dataTransfer.files;
+                
+                updateImagePreview(dataTransfer.files);
+            }
         }
     }
 

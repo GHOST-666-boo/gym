@@ -37,14 +37,14 @@ class ProductRequest extends FormRequest
         // Image validation rules - support both single and multiple images
         if ($this->isMethod('post')) {
             // Creating new product - images are optional but if provided must be valid
-            $rules['image'] = 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240|dimensions:min_width=300,min_height=300';
-            $rules['images'] = 'nullable|array|max:10';
-            $rules['images.*'] = 'image|mimes:jpeg,png,jpg,gif,webp|max:10240|dimensions:min_width=300,min_height=300';
+            $rules['image_path'] = 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240|dimensions:min_width=300,min_height=300';
+            $rules['gallery_images'] = 'nullable|array|max:10';
+            $rules['gallery_images.*'] = 'image|mimes:jpeg,png,jpg,gif,webp|max:10240|dimensions:min_width=300,min_height=300';
         } else {
             // Updating existing product - images are optional
-            $rules['image'] = 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240|dimensions:min_width=300,min_height=300';
-            $rules['images'] = 'nullable|array|max:10';
-            $rules['images.*'] = 'image|mimes:jpeg,png,jpg,gif,webp|max:10240|dimensions:min_width=300,min_height=300';
+            $rules['image_path'] = 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240|dimensions:min_width=300,min_height=300';
+            $rules['gallery_images'] = 'nullable|array|max:10';
+            $rules['gallery_images.*'] = 'image|mimes:jpeg,png,jpg,gif,webp|max:10240|dimensions:min_width=300,min_height=300';
         }
 
         return $rules;
@@ -67,15 +67,15 @@ class ProductRequest extends FormRequest
             'long_description.required' => 'A detailed description is required.',
             'long_description.max' => 'The detailed description cannot exceed 10,000 characters.',
             'category_id.exists' => 'The selected category is invalid.',
-            'image.image' => 'The uploaded file must be an image.',
-            'image.mimes' => 'The image must be a JPEG, PNG, JPG, GIF, or WebP file.',
-            'image.max' => 'The image size cannot exceed 10MB.',
-            'images.max' => 'You can upload maximum 10 images per product.',
-            'images.*.image' => 'Each uploaded file must be an image.',
-            'images.*.mimes' => 'Each image must be a JPEG, PNG, JPG, GIF, or WebP file.',
-            'images.*.max' => 'Each image size cannot exceed 10MB.',
-            'images.*.dimensions' => 'Each image must be at least 300x300 pixels.',
-            'image.dimensions' => 'The image must be at least 300x300 pixels.',
+            'image_path.image' => 'The uploaded file must be an image.',
+            'image_path.mimes' => 'The image must be a JPEG, PNG, JPG, GIF, or WebP file.',
+            'image_path.max' => 'The image size cannot exceed 10MB.',
+            'image_path.dimensions' => 'The image must be at least 300x300 pixels.',
+            'gallery_images.max' => 'You can upload maximum 10 images per product.',
+            'gallery_images.*.image' => 'Each uploaded file must be an image.',
+            'gallery_images.*.mimes' => 'Each image must be a JPEG, PNG, JPG, GIF, or WebP file.',
+            'gallery_images.*.max' => 'Each image size cannot exceed 10MB.',
+            'gallery_images.*.dimensions' => 'Each image must be at least 300x300 pixels.',
             'stock_quantity.required' => 'The stock quantity is required.',
             'stock_quantity.integer' => 'The stock quantity must be a whole number.',
             'stock_quantity.min' => 'The stock quantity cannot be negative.',
@@ -101,7 +101,8 @@ class ProductRequest extends FormRequest
             'short_description' => 'short description',
             'long_description' => 'detailed description',
             'category_id' => 'category',
-            'image' => 'product image',
+            'image_path' => 'product image',
+            'gallery_images' => 'gallery images',
             'stock_quantity' => 'stock quantity',
             'low_stock_threshold' => 'low stock threshold',
             'track_inventory' => 'inventory tracking',

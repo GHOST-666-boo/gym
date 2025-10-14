@@ -36,8 +36,8 @@
                         @foreach($allImages as $index => $image)
                             <div class="carousel-slide {{ $index === 0 ? 'active' : '' }} absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-in-out {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}">
                                 @php
-                                    // Extract image path from URL for watermarking
-                                    $imagePath = str_replace(asset('storage/'), '', $image['url']);
+                                    // Get image path directly from the image model
+                                    $imagePath = isset($images[$index]) ? $images[$index]->image_path : str_replace(asset('storage/'), '', $image['url']);
                                 @endphp
                                 <x-product-image 
                                     :image-path="$imagePath"
@@ -93,7 +93,7 @@
                                         data-index="{{ $index }}"
                                         title="Click to select, double-click to enlarge">
                                     @php
-                                        $imagePath = str_replace(asset('storage/'), '', $image['url']);
+                                        $imagePath = isset($images[$index]) ? $images[$index]->image_path : str_replace(asset('storage/'), '', $image['url']);
                                     @endphp
                                     <x-product-image 
                                         :image-path="$imagePath"
@@ -264,7 +264,7 @@
             @foreach($allImages as $index => $image)
                 <div class="lightbox-slide {{ $index === 0 ? 'active' : '' }} absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-in-out {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}" style="padding: 80px 80px 120px 80px;">
                     @php
-                        $imagePath = str_replace(asset('storage/'), '', $image['url']);
+                        $imagePath = isset($images[$index]) ? $images[$index]->image_path : str_replace(asset('storage/'), '', $image['url']);
                     @endphp
                     <x-product-image 
                         :image-path="$imagePath"
@@ -304,7 +304,7 @@
                                 class="lightbox-thumbnail-btn flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border-2 transition-all duration-200 {{ $index === 0 ? 'border-white' : 'border-gray-500' }}"
                                 data-index="{{ $index }}">
                             @php
-                                $imagePath = str_replace(asset('storage/'), '', $image['url']);
+                                $imagePath = isset($images[$index]) ? $images[$index]->image_path : str_replace(asset('storage/'), '', $image['url']);
                             @endphp
                             <x-product-image 
                                 :image-path="$imagePath"

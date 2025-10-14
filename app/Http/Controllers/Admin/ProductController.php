@@ -56,19 +56,26 @@ class ProductController extends Controller
         try {
             $validated = $request->validated();
 
+            // Debug: Log what files are being received
+            \Log::info('Product creation request debug', [
+                'has_gallery_images' => $request->hasFile('gallery_images'),
+                'has_image_path' => $request->hasFile('image_path'),
+                'gallery_images_count' => $request->hasFile('gallery_images') ? count($request->file('gallery_images')) : 0,
+                'all_files' => $request->allFiles()
+            ]);
+
             // Remove image fields from validated data as we handle them separately
-            unset($validated['image'], $validated['images']);
+            unset($validated['image_path'], $validated['gallery_images']);
 
             $product = Product::create($validated);
 
             $messages = [];
 
             // Handle single image upload (legacy support)
-            if ($request->hasFile('image')) {
-                $uploadResult = $this->fileUploadService->uploadProductImage($request->file('image'));
+            if ($request->hasFile('image_path')) {
+                $uploadResult = $this->fileUploadService->uploadProductImage($request->file('image_path'));
                 
                 if ($uploadResult['success']) {
-                    $validated['image_path'] = $uploadResult['path'];
                     $product->update(['image_path' => $uploadResult['path']]);
                     $messages[] = 'Main image uploaded successfully.';
                 } else {
@@ -76,10 +83,10 @@ class ProductController extends Controller
                 }
             }
 
-            // Handle multiple images upload
-            if ($request->hasFile('images')) {
+            // Handle multiple images upload (gallery)
+            if ($request->hasFile('gallery_images')) {
                 $uploadResult = $this->fileUploadService->uploadMultipleProductImages(
-                    $request->file('images'), 
+                    $request->file('gallery_images'), 
                     $product->id
                 );
                 
@@ -139,16 +146,16 @@ class ProductController extends Controller
             $validated = $request->validated();
 
             // Remove image fields from validated data as we handle them separately
-            unset($validated['image'], $validated['images']);
+            unset($validated['image_path'], $validated['gallery_images']);
 
             $product->update($validated);
 
             $messages = [];
 
             // Handle single image upload (legacy support)
-            if ($request->hasFile('image')) {
+            if ($request->hasFile('image_path')) {
                 $uploadResult = $this->fileUploadService->uploadProductImage(
-                    $request->file('image'), 
+                    $request->file('image_path'), 
                     $product->image_path
                 );
                 
@@ -160,10 +167,10 @@ class ProductController extends Controller
                 }
             }
 
-            // Handle multiple images upload
-            if ($request->hasFile('images')) {
+            // Handle multiple images upload (gallery)
+            if ($request->hasFile('gallery_images')) {
                 $uploadResult = $this->fileUploadService->uploadMultipleProductImages(
-                    $request->file('images'), 
+                    $request->file('gallery_images'), 
                     $product->id
                 );
                 
